@@ -24,3 +24,9 @@ services:
       - postgres_data:/var/lib/postgresql
     env_file:
       - ./.envs/.local/.postgres
+
+  mailpit:
+    image: docker.io/axllent/mailpit:latest
+    container_name: taskminder_local_mailpit
+    ports:
+      - "8025:8025"
