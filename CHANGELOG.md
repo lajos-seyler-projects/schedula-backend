@@ -1,3 +1,16 @@
+## 0.3.0 (2026-04-11)
+
+### Feat
+
+- add token verify API endpoint
+- add token blacklist API endpoint
+- add token refresh API endpoint
+- add token API endpoint
+- add user activate endpoint
+- send registration email in register API
+- change user model's primary key to uuid field
+- add register API endpoint
+
 ## 0.2.0 (2026-04-11)
 
 ### Feat
