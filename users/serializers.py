@@ -40,3 +40,30 @@ class TokenObtainPairSerializer(DefaultTokenObtainPairSerializer):
         token["last_name"] = user.last_name
         token["email"] = user.email
         return token
+
+
+class UserMeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "password",
+        )
+        extra_kwargs = {
+            "username": {"required": False},
+            "email": {"required": False},
+            "password": {"required": False, "write_only": True},
+        }
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+        user = super().update(instance, validated_data)
+
+        if password:
+            user.set_password(password)
+            user.save()
+
+        return user

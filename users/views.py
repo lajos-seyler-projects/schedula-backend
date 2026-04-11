@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, views, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework import mixins, status, views, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import (
@@ -11,15 +11,15 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefreshView
 
+from . import serializers
 from .models import User
-from .serializers import TokenObtainPairSerializer, UserRegistrationSerializer
 from .utils import send_registration_email
 
 
 class RegisterView(viewsets.generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
-    serializer_class = UserRegistrationSerializer
+    serializer_class = serializers.UserRegistrationSerializer
 
     def perform_create(self, serializer):
         user = serializer.save()
@@ -42,7 +42,7 @@ class UserActivateView(views.APIView):
 
 
 class TokenObtainPairView(DefaultTokenObtainPairView):
-    serializer_class = TokenObtainPairSerializer
+    serializer_class = serializers.TokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -81,3 +81,16 @@ class TokenBlacklistView(DefaultTokenBlacklistView):
         response = Response(serializer.validated_data, status=status.HTTP_200_OK)
         response.delete_cookie("refresh")
         return response
+
+
+class CurrentUserRetrieveUpdateViewSet(
+    mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """User retrieve and update viewsets for the current user"""
+
+    serializer_class = serializers.UserMeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        """Return the current request user"""
+        return self.request.user
