@@ -7,4 +7,9 @@ app_name = "users"
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
+    path(
+        "users/<uuid>/activate/<token>/",
+        views.UserActivateView.as_view(),
+        name="activate",
+    ),
 ]

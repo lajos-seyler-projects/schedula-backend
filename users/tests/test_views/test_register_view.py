@@ -2,7 +2,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.urls import reverse
-from rest_framework.test import APIClient
 
 from users.factories import UserFactory
 
@@ -13,19 +12,16 @@ User = get_user_model()
 REGISTER_URL = reverse("users:register")
 
 
-def test_user_registration_view_method_not_allowed():
-    client = APIClient()
-
-    response = client.get(REGISTER_URL)
+def test_user_registration_view_method_not_allowed(drf_client):
+    response = drf_client.get(REGISTER_URL)
 
     assert response.status_code == 405
     assert response.data == {"detail": 'Method "GET" not allowed.'}
     assert response["Allow"] == "POST, OPTIONS"
 
 
-def test_user_registration_view():
+def test_user_registration_view(drf_client):
     mail.outbox = []
-    client = APIClient()
 
     user_data = UserFactory.build()
 
@@ -37,7 +33,7 @@ def test_user_registration_view():
         "password": user_data.password,
     }
 
-    response = client.post(REGISTER_URL, data, format="json")
+    response = drf_client.post(REGISTER_URL, data, format="json")
 
     assert response.status_code == 201
     assert response.data["username"] == data["username"]
@@ -56,9 +52,7 @@ def test_user_registration_view():
     assert data["email"] in email_sent.to
 
 
-def test_user_registration_view_invalid_data():
-    client = APIClient()
-
+def test_user_registration_view_invalid_data(drf_client):
     data = {
         "username": "",
         "email": "",
@@ -67,7 +61,7 @@ def test_user_registration_view_invalid_data():
         "password": "",
     }
 
-    response = client.post(REGISTER_URL, data, format="json")
+    response = drf_client.post(REGISTER_URL, data, format="json")
 
     assert response.status_code == 400
     assert "username" in response.data
