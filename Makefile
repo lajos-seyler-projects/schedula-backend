@@ -1,5 +1,5 @@
 up:
-	@docker compose -f docker-compose.local.yaml up -d
+	@docker compose -f docker-compose.local.yaml up -d --build
 
 down:
 	@docker compose -f docker-compose.local.yaml down
@@ -15,3 +15,6 @@ migrate:
 
 createsuperuser:
 	@docker compose -f docker-compose.local.yaml run --rm django python manage.py createsuperuser
+
+test:
+	@docker compose -f docker-compose.local.yaml run --rm django pytest
