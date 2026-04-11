@@ -58,6 +58,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
 ]
@@ -97,6 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/stable/ref/settings/#middleware
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -210,3 +212,8 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+
+# django-cors-headers
+# https://github.com/adamchainz/django-cors-headers
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[FRONTEND_URL])
+CORS_ALLOW_CREDENTIALS = True
