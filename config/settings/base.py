@@ -3,12 +3,19 @@
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 
 env = environ.Env()
 
 # GENERAL
+PROJECT_NAME = env("PROJECT_NAME", default=None)
+
+if not PROJECT_NAME:
+    raise ImproperlyConfigured("PROJECT_NAME cannot be empty")
+
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000")
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/stable/ref/settings/#debug
 DEBUG = env.bool("DJANGO_DEBUG", False)
@@ -190,3 +197,7 @@ LOGGING = {
 EMAIL_HOST = env("EMAIL_HOST", default="mailpit")
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
 EMAIL_PORT = 1025
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=None)
+
+if not DEFAULT_FROM_EMAIL:
+    raise ImproperlyConfigured("DEFAULT_FROM_EMAIL cannot be empty")

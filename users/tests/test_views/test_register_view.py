@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -23,6 +24,7 @@ def test_user_registration_view_method_not_allowed():
 
 
 def test_user_registration_view():
+    mail.outbox = []
     client = APIClient()
 
     user_data = UserFactory.build()
@@ -48,6 +50,10 @@ def test_user_registration_view():
     registered_user.refresh_from_db()
 
     assert registered_user.is_active is False
+
+    email_sent = mail.outbox[0]
+    assert "Verify your email" in email_sent.subject
+    assert data["email"] in email_sent.to
 
 
 def test_user_registration_view_invalid_data():

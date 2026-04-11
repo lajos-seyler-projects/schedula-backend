@@ -1,10 +1,12 @@
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils import timezone
 
 from .managers import UserManager
+from .tokens import account_activation_token_generator
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -38,3 +40,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def get_activation_token(self):
+        return account_activation_token_generator.make_token(self)
+
+    def get_activation_link(self):
+        return f"{settings.FRONTEND_URL}/users/activate/{self.uuid}/{self.get_activation_token()}"
