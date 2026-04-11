@@ -1,3 +1,9 @@
+## 0.4.0 (2026-04-11)
+
+### Feat
+
+- configure django-cors-headers
+
 ## 0.3.0 (2026-04-11)
 
 ### Feat
