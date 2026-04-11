@@ -12,4 +12,5 @@ urlpatterns = [
         views.UserActivateView.as_view(),
         name="activate",
     ),
+    path("token/", views.TokenObtainPairView().as_view(), name="token_obtain_pair"),
 ]

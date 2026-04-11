@@ -2,9 +2,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, views, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView as DefaultTokenObtainPairView,
+)
 
 from .models import User
-from .serializers import UserRegistrationSerializer
+from .serializers import TokenObtainPairSerializer, UserRegistrationSerializer
 from .utils import send_registration_email
 
 
@@ -31,3 +34,19 @@ class UserActivateView(views.APIView):
         return Response(
             {"message": "User activated successfully."}, status=status.HTTP_200_OK
         )
+
+
+class TokenObtainPairView(DefaultTokenObtainPairView):
+    serializer_class = TokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        refresh_token = response.data.pop("refresh", None)
+        response.set_cookie(
+            key="refresh",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="None",
+        )
+        return response

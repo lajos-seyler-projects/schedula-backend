@@ -201,3 +201,11 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=None)
 
 if not DEFAULT_FROM_EMAIL:
     raise ImproperlyConfigured("DEFAULT_FROM_EMAIL cannot be empty")
+
+# Django REST Framework
+# https://www.django-rest-framework.org/api-guide/settings/
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
