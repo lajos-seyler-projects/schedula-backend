@@ -1,8 +1,10 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import PasswordField
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as DefaultTokenObtainPairSerializer,
 )
 
+from .constants import EMAIL_ERRORS, PASSWORD_ERRORS
 from .models import User
 
 
@@ -37,6 +39,12 @@ class ActivationResponseSerializer(serializers.Serializer):
 
 
 class TokenObtainPairSerializer(DefaultTokenObtainPairSerializer):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.fields["email"] = serializers.EmailField(error_messages=EMAIL_ERRORS)
+        self.fields["password"] = PasswordField(error_messages=PASSWORD_ERRORS)
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
