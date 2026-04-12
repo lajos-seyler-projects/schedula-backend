@@ -32,6 +32,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+class ActivationResponseSerializer(serializers.Serializer):
+    message = serializers.CharField()
+
+
 class TokenObtainPairSerializer(DefaultTokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):

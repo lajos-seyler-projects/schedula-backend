@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, status, views, viewsets
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -10,6 +10,8 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView as DefaultTokenObtainPairView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefreshView
+
+from config.schema import extend_api_schema
 
 from . import serializers
 from .models import User
@@ -26,7 +28,10 @@ class RegisterView(viewsets.generics.CreateAPIView):
         send_registration_email(user)
 
 
-class UserActivateView(views.APIView):
+@extend_api_schema("UserActivateView")
+class UserActivateView(generics.GenericAPIView):
+    serializer_class = serializers.ActivationResponseSerializer
+
     def get(self, *args, uuid, token):
         user = get_object_or_404(User, uuid=uuid)
 
