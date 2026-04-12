@@ -30,7 +30,7 @@ def test_token_obtain_pair_view(drf_client, user):
 
 def test_token_obtain_pair_view_invalid_credentials(drf_client):
     data = {
-        "email": "email",
+        "email": "email@example.com",
         "password": "password123",
     }
 
