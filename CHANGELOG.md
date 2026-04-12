@@ -1,3 +1,13 @@
+## 0.6.0 (2026-04-12)
+
+### Feat
+
+- configure drf-spectacular and client generation
+
+### Fix
+
+- user activation link to match updated API url
+
 ## 0.5.0 (2026-04-12)
 
 ### Feat
