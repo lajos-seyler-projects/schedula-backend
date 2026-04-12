@@ -59,6 +59,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "corsheaders",
+    "drf_spectacular",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
 ]
@@ -211,9 +212,19 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # django-cors-headers
 # https://github.com/adamchainz/django-cors-headers
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[FRONTEND_URL])
 CORS_ALLOW_CREDENTIALS = True
+
+# drf-spectacular
+# https://drf-spectacular.readthedocs.io/en/latest/settings.html
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Schedula",
+    "DESCRIPTION": "An activity planner",
+    "VERSION": "1.0.0",
+    "COMPONENT_SPLIT_REQUEST": True,
+}
