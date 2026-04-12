@@ -21,4 +21,11 @@ urlpatterns = [
         name="token_blacklist",
     ),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
+    path(
+        "me/",
+        views.CurrentUserRetrieveUpdateViewSet.as_view(
+            {"patch": "update", "get": "retrieve"}
+        ),
+        name="me",
+    ),
 ]
