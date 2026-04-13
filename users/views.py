@@ -31,6 +31,7 @@ class RegisterView(viewsets.generics.CreateAPIView):
 @extend_api_schema("UserActivateView")
 class UserActivateView(generics.GenericAPIView):
     serializer_class = serializers.ActivationResponseSerializer
+    permission_classes = [AllowAny]
 
     def get(self, *args, uuid, token):
         user = get_object_or_404(User, uuid=uuid)
