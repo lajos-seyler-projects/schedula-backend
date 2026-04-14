@@ -1,3 +1,15 @@
+## 0.7.0 (2026-04-14)
+
+### Feat
+
+- add users API
+- configure default pagination
+- configure DjangoModelPermissions as default permission class
+
+### Fix
+
+- User model
+
 ## 0.6.0 (2026-04-12)
 
 ### Feat
