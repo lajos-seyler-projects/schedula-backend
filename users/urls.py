@@ -46,5 +46,10 @@ urlpatterns = [
         views.TimezoneChoicesAPIView.as_view(),
         name="timezone-choices",
     ),
+    path(
+        "user-preferences/time-format-choices",
+        views.TimeFormatChoicesAPIView.as_view(),
+        name="time-format-choices",
+    ),
     path("", include(router.urls)),
 ]

@@ -138,3 +138,7 @@ class TimezoneChoicesAPIView(APIView):
     def get(self, request):
         return Response(build_timezone_response())
 
+
+class TimeFormatChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.TimeFormatChoices
+
