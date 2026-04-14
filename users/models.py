@@ -59,3 +59,64 @@ class User(AbstractBaseUser, PermissionsMixin):
             return True
         else:
             return False
+
+
+class UserPreferences(models.Model):
+    class DateFormatChoices(models.TextChoices):
+        ISO = "is", "YYYY-MM-DD"
+        EU_DOT = "ed", "DD.MM.YYYY"
+        EU_SLASH = "es", "DD/MM/YYYY"
+        US = "us", "MM/DD/YYYY"
+        DOT = "dt", "YYYY.MM.DD"
+        CMP = "cp", "YYYYMMDD"
+
+    class DecimalFormatChoices(models.TextChoices):
+        US = "us", "1,234,567.8"
+        EU = "eu", "1 234 567,8"
+        DE = "de", "1.234.567,8"
+        NONE = "nn", "1234567.8"
+        CH = "ch", "1'234'567.8"
+
+    class TimeFormatChoices(models.TextChoices):
+        H12 = "12", "12-hour"
+        H24 = "24", "24-hour"
+
+    class FioriThemeChoices(models.TextChoices):
+        SAP_HORIZON = "sap_horizon", "Morning Horizon (Light)"
+        SAP_HORIZON_DARK = "sap_horizon_dark", "Evening Horizon (Dark)"
+        SAP_HORIZON_HCB = "sap_horizon_hcb", "Horizon High Contrast Black"
+        SAP_HORIZON_HCW = "sap_horizon_hcw", "Horizon High Contrast White"
+        SAP_HORIZON_AUTO = "sap_horizon_auto", "OS Adaptive Horizon Theme"
+        SAP_HORIZON_HC_AUTO = (
+            "sap_horizon_hc_auto",
+            "OS Adaptive Hight Contrast Horizon Theme",
+        )
+        SAP_FIORI_3 = "sap_fiori_3", "Quartz Light"
+        SAP_FIORI_3_DARK = "sap_fiori_3_dark", "Quartz Dark"
+        SAP_FIORI_3_HCB = "sap_fiori_3_hcb", "Quartz High Contrast Black"
+        SAP_FIORI_3_HCW = "sap_fiori_3_hcw", "Quartz High Contrast White"
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    date_format = models.CharField(
+        max_length=2, choices=DateFormatChoices, default=DateFormatChoices.ISO
+    )
+    decimal_format = models.CharField(
+        max_length=2, choices=DecimalFormatChoices, default=DecimalFormatChoices.US
+    )
+    time_zone = models.CharField(max_length=64, default="Etc/UTC")
+    time_format = models.CharField(
+        max_length=2, choices=TimeFormatChoices, default="24"
+    )
+    fiori_theme = models.CharField(
+        max_length=19,
+        choices=FioriThemeChoices,
+        default=FioriThemeChoices.SAP_HORIZON_AUTO,
+    )
+    show_timezone = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "User Preferences"
+        verbose_name_plural = "User Preferences"
+
+    def __str__(self):
+        return f"Preferences for {self.user}"
