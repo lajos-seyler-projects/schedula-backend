@@ -34,10 +34,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    class Meta:
+        ordering = ["username"]
+
     def __str__(self):
         return f"User username={self.username} email={self.email}"
 
     def save(self, *args, **kwargs):
+        if not self.password:
+            self.set_unusable_password()
         self.full_clean()
         super().save(*args, **kwargs)
 
