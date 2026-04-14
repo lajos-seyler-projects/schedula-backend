@@ -1,10 +1,13 @@
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenVerifyView
 
 from . import views
 
 app_name = "users"
 
+router = DefaultRouter()
+router.register(r"users", views.UsersViewSet, basename="users")
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
@@ -28,4 +31,5 @@ urlpatterns = [
         ),
         name="me",
     ),
+    path("", include(router.urls)),
 ]

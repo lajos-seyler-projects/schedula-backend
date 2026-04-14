@@ -31,6 +31,7 @@ class RegisterView(viewsets.generics.CreateAPIView):
 @extend_api_schema("UserActivateView")
 class UserActivateView(generics.GenericAPIView):
     serializer_class = serializers.ActivationResponseSerializer
+    permission_classes = [AllowAny]
 
     def get(self, *args, uuid, token):
         user = get_object_or_404(User, uuid=uuid)
@@ -99,3 +100,13 @@ class CurrentUserRetrieveUpdateViewSet(
     def get_object(self):
         """Return the current request user"""
         return self.request.user
+
+
+class UsersViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    lookup_field = "uuid"
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return serializers.UserDetailsSerializer
+        return serializers.UserSlimSerializer
