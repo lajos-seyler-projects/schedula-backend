@@ -19,6 +19,9 @@ createsuperuser:
 test:
 	@docker compose -f docker-compose.local.yaml run --rm django pytest
 
+testk:
+	@docker compose -f docker-compose.local.yaml run --rm django pytest -k $(k)
+
 generate-client:
 	@docker compose -f docker-compose.local.yaml run --rm django python manage.py spectacular --file schema.yaml --validate --fail-on-warn
 	@docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i /local/schema.yaml -g typescript-axios -o /local/typescript-axios-client/

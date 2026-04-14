@@ -71,3 +71,31 @@ class UserMeSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+
+
+class UserSlimSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "is_superuser",
+        )
+
+
+class UserDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "is_superuser",
+            "date_joined",
+            "last_login",
+        )

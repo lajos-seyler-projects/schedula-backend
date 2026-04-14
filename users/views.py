@@ -100,3 +100,13 @@ class CurrentUserRetrieveUpdateViewSet(
     def get_object(self):
         """Return the current request user"""
         return self.request.user
+
+
+class UsersViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    lookup_field = "uuid"
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return serializers.UserDetailsSerializer
+        return serializers.UserSlimSerializer

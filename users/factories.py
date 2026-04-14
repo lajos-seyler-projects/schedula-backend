@@ -22,3 +22,8 @@ class UserFactory(factory.django.DjangoModelFactory):
             user.save()
 
         return user
+
+
+class SuperUserFactory(UserFactory):
+    is_staff = True
+    is_superuser = True
