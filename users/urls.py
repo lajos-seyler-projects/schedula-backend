@@ -31,5 +31,10 @@ urlpatterns = [
         ),
         name="me",
     ),
+    path(
+        "user-preferences/date-format-choices",
+        views.DateFormatChoicesAPIView.as_view(),
+        name="date-format-choices",
+    ),
     path("", include(router.urls)),
 ]

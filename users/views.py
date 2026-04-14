@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import (
     TokenBlacklistView as DefaultTokenBlacklistView,
@@ -11,10 +12,11 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefreshView
 
+from common.serializers import ChoiceSerializer
 from config.schema import extend_api_schema
 
 from . import serializers
-from .models import User
+from .models import User, UserPreferences
 from .utils import send_registration_email
 
 
@@ -110,3 +112,18 @@ class UsersViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return serializers.UserDetailsSerializer
         return serializers.UserSlimSerializer
+
+
+class BaseChoicesAPIView(APIView):
+    choices_class = None
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = [{"value": c.value, "label": c.label} for c in self.choices_class]
+        serializer = ChoiceSerializer(data, many=True)
+        return Response(serializer.data)
+
+
+class DateFormatChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.DateFormatChoices
+
