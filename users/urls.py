@@ -51,5 +51,10 @@ urlpatterns = [
         views.TimeFormatChoicesAPIView.as_view(),
         name="time-format-choices",
     ),
+    path(
+        "user-preferences/fiori-theme-choices",
+        views.FioriThemeChoicesAPIView.as_view(),
+        name="fiori-theme-choices",
+    ),
     path("", include(router.urls)),
 ]

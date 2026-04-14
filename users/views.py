@@ -142,3 +142,6 @@ class TimezoneChoicesAPIView(APIView):
 class TimeFormatChoicesAPIView(BaseChoicesAPIView):
     choices_class = UserPreferences.TimeFormatChoices
 
+
+class FioriThemeChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.FioriThemeChoices
