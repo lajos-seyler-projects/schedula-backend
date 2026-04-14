@@ -127,3 +127,7 @@ class BaseChoicesAPIView(APIView):
 class DateFormatChoicesAPIView(BaseChoicesAPIView):
     choices_class = UserPreferences.DateFormatChoices
 
+
+class DecimalFormatChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.DecimalFormatChoices
+

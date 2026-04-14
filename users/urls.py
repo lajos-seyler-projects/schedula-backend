@@ -36,5 +36,10 @@ urlpatterns = [
         views.DateFormatChoicesAPIView.as_view(),
         name="date-format-choices",
     ),
+    path(
+        "user-preferences/decimal-format-choices",
+        views.DecimalFormatChoicesAPIView.as_view(),
+        name="decimal-format-choices",
+    ),
     path("", include(router.urls)),
 ]
