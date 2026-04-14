@@ -17,7 +17,7 @@ from config.schema import extend_api_schema
 
 from . import serializers
 from .models import User, UserPreferences
-from .utils import send_registration_email
+from .utils import build_timezone_response, send_registration_email
 
 
 class RegisterView(viewsets.generics.CreateAPIView):
@@ -130,4 +130,11 @@ class DateFormatChoicesAPIView(BaseChoicesAPIView):
 
 class DecimalFormatChoicesAPIView(BaseChoicesAPIView):
     choices_class = UserPreferences.DecimalFormatChoices
+
+
+class TimezoneChoicesAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(build_timezone_response())
 
