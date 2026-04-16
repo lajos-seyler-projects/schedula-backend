@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -119,6 +120,7 @@ class BaseChoicesAPIView(APIView):
     choices_class = None
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses=ChoiceSerializer(many=True))
     def get(self, request):
         data = [{"value": c.value, "label": c.label} for c in self.choices_class]
         serializer = ChoiceSerializer(data, many=True)
@@ -133,6 +135,7 @@ class DecimalFormatChoicesAPIView(BaseChoicesAPIView):
     choices_class = UserPreferences.DecimalFormatChoices
 
 
+@extend_schema(exclude=True)
 class TimezoneChoicesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
