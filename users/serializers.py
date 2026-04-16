@@ -103,12 +103,28 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
 class UserPreferencesSerializer(serializers.ModelSerializer):
     date_format = serializers.ChoiceField(choices=UserPreferences.DateFormatChoices)
+    date_format_display = serializers.CharField(
+        source="get_date_format_display",
+        read_only=True,
+    )
     decimal_format = serializers.ChoiceField(
         choices=UserPreferences.DecimalFormatChoices
     )
+    decimal_format_display = serializers.CharField(
+        source="get_decimal_format_display",
+        read_only=True,
+    )
     time_zone = serializers.CharField()
     time_format = serializers.ChoiceField(choices=UserPreferences.TimeFormatChoices)
+    time_format_display = serializers.CharField(
+        source="get_time_format_display",
+        read_only=True,
+    )
     fiori_theme = serializers.ChoiceField(choices=UserPreferences.FioriThemeChoices)
+    fiori_theme_display = serializers.CharField(
+        source="get_fiori_theme_display",
+        read_only=True,
+    )
     show_timezone = serializers.BooleanField()
 
     class Meta:
