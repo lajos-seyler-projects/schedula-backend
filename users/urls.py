@@ -8,6 +8,7 @@ app_name = "users"
 
 router = DefaultRouter()
 router.register(r"users", views.UsersViewSet, basename="users")
+router.register(r"me", views.UserPreferencesViewSet, basename="me")
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),

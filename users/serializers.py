@@ -3,7 +3,7 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as DefaultTokenObtainPairSerializer,
 )
 
-from .models import User
+from .models import User, UserPreferences
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -99,3 +99,9 @@ class UserDetailsSerializer(serializers.ModelSerializer):
             "date_joined",
             "last_login",
         )
+
+
+class UserPreferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPreferences
+        exclude = ("user",)

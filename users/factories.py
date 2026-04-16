@@ -1,7 +1,8 @@
 import factory
 from django.contrib.auth.hashers import make_password
+from factory import fuzzy
 
-from users.models import User
+from users.models import User, UserPreferences
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -27,3 +28,13 @@ class UserFactory(factory.django.DjangoModelFactory):
 class SuperUserFactory(UserFactory):
     is_staff = True
     is_superuser = True
+
+
+class UserPreferencesFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = UserPreferences
+
+    date_format = fuzzy.FuzzyChoice(UserPreferences.DateFormatChoices)
+    decimal_format = fuzzy.FuzzyChoice(UserPreferences.DecimalFormatChoices)
+    time_format = fuzzy.FuzzyChoice(UserPreferences.TimeFormatChoices)
+    fiori_theme = fuzzy.FuzzyChoice(UserPreferences.FioriThemeChoices)

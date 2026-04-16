@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -145,3 +146,23 @@ class TimeFormatChoicesAPIView(BaseChoicesAPIView):
 
 class FioriThemeChoicesAPIView(BaseChoicesAPIView):
     choices_class = UserPreferences.FioriThemeChoices
+
+
+class UserPreferencesViewSet(viewsets.GenericViewSet):
+    serializer_class = serializers.UserPreferencesSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get", "patch"])
+    def preferences(self, request):
+        obj, _ = UserPreferences.objects.get_or_create(user=request.user)
+
+        if request.method == "GET":
+            serializer = self.get_serializer(obj)
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(
+            obj, data={**request.data, "user": request.user.pk}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
