@@ -102,6 +102,15 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
 
 class UserPreferencesSerializer(serializers.ModelSerializer):
+    date_format = serializers.ChoiceField(choices=UserPreferences.DateFormatChoices)
+    decimal_format = serializers.ChoiceField(
+        choices=UserPreferences.DecimalFormatChoices
+    )
+    time_zone = serializers.CharField()
+    time_format = serializers.ChoiceField(choices=UserPreferences.TimeFormatChoices)
+    fiori_theme = serializers.ChoiceField(choices=UserPreferences.FioriThemeChoices)
+    show_timezone = serializers.BooleanField()
+
     class Meta:
         model = UserPreferences
         exclude = ("user",)
