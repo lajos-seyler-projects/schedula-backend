@@ -1,3 +1,20 @@
+## 0.8.0 (2026-04-17)
+
+### Feat
+
+- update preferences API to also return labels
+- add user preferences API endpoint
+- add fiori theme choices API endpoint
+- add time format choices API endpoint
+- add timezone choices API endpoint
+- add decimal format choices API endpoint
+- add date format choices API endpoint
+- add UserPreferences model
+
+### Fix
+
+- schema generation for UserPreferences
+
 ## 0.7.0 (2026-04-14)
 
 ### Feat
