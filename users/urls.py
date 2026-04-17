@@ -8,6 +8,7 @@ app_name = "users"
 
 router = DefaultRouter()
 router.register(r"users", views.UsersViewSet, basename="users")
+router.register(r"me", views.UserPreferencesViewSet, basename="me")
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
@@ -30,6 +31,31 @@ urlpatterns = [
             {"patch": "update", "get": "retrieve"}
         ),
         name="me",
+    ),
+    path(
+        "user-preferences/date-format-choices",
+        views.DateFormatChoicesAPIView.as_view(),
+        name="date-format-choices",
+    ),
+    path(
+        "user-preferences/decimal-format-choices",
+        views.DecimalFormatChoicesAPIView.as_view(),
+        name="decimal-format-choices",
+    ),
+    path(
+        "user-preferences/timezone-choices",
+        views.TimezoneChoicesAPIView.as_view(),
+        name="timezone-choices",
+    ),
+    path(
+        "user-preferences/time-format-choices",
+        views.TimeFormatChoicesAPIView.as_view(),
+        name="time-format-choices",
+    ),
+    path(
+        "user-preferences/fiori-theme-choices",
+        views.FioriThemeChoicesAPIView.as_view(),
+        name="fiori-theme-choices",
     ),
     path("", include(router.urls)),
 ]

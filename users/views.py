@@ -1,7 +1,10 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import (
     TokenBlacklistView as DefaultTokenBlacklistView,
@@ -11,11 +14,12 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefreshView
 
+from common.serializers import ChoiceSerializer
 from config.schema import extend_api_schema
 
 from . import serializers
-from .models import User
-from .utils import send_registration_email
+from .models import User, UserPreferences
+from .utils import build_timezone_response, send_registration_email
 
 
 class RegisterView(viewsets.generics.CreateAPIView):
@@ -110,3 +114,58 @@ class UsersViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return serializers.UserDetailsSerializer
         return serializers.UserSlimSerializer
+
+
+class BaseChoicesAPIView(APIView):
+    choices_class = None
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses=ChoiceSerializer(many=True))
+    def get(self, request):
+        data = [{"value": c.value, "label": c.label} for c in self.choices_class]
+        serializer = ChoiceSerializer(data, many=True)
+        return Response(serializer.data)
+
+
+class DateFormatChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.DateFormatChoices
+
+
+class DecimalFormatChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.DecimalFormatChoices
+
+
+@extend_schema(exclude=True)
+class TimezoneChoicesAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(build_timezone_response())
+
+
+class TimeFormatChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.TimeFormatChoices
+
+
+class FioriThemeChoicesAPIView(BaseChoicesAPIView):
+    choices_class = UserPreferences.FioriThemeChoices
+
+
+class UserPreferencesViewSet(viewsets.GenericViewSet):
+    serializer_class = serializers.UserPreferencesSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get", "patch"])
+    def preferences(self, request):
+        obj, _ = UserPreferences.objects.get_or_create(user=request.user)
+
+        if request.method == "GET":
+            serializer = self.get_serializer(obj)
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(
+            obj, data={**request.data, "user": request.user.pk}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

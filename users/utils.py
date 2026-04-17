@@ -1,3 +1,7 @@
+from collections import defaultdict
+from datetime import datetime
+from zoneinfo import ZoneInfo, available_timezones
+
 from django.conf import settings
 from django.core.mail import send_mail
 
@@ -77,3 +81,36 @@ def send_registration_email(user):
         recipient_list=[to_email],
         fail_silently=False,
     )
+
+
+def format_offset(tz_name: str) -> str:
+    now = datetime.now(ZoneInfo(tz_name))
+    offset = now.utcoffset().total_seconds() / 3600
+
+    sign = "+" if offset >= 0 else "-"
+    return f"UTC{sign}{abs(offset):g}"
+
+
+def get_continent(tz: str) -> str:
+    # "Europe/Budapest" -> "Europe"
+    return tz.split("/")[0] if "/" in tz else "Other"
+
+
+def build_timezone_response():
+    grouped = defaultdict(list)
+
+    for tz in sorted(available_timezones()):
+        if "/" not in tz:
+            continue  # skip UTC, etc.
+
+        continent = get_continent(tz)
+        offset = format_offset(tz)
+
+        grouped[continent].append(
+            {
+                "value": tz,
+                "offset": offset,
+            }
+        )
+
+    return grouped

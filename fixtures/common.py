@@ -21,7 +21,7 @@ def get_tokens(user):
 @pytest.fixture
 def user(db):  # noqa: ARG001
     """Creates a user"""
-    return UserFactory.create()
+    return UserFactory.create(is_active=True)
 
 
 @pytest.fixture

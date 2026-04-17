@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from users.models import User
+from users.models import User, UserPreferences
 
 
 @admin.register(User)
@@ -48,3 +48,17 @@ class CustomUserAdmin(UserAdmin):
         "groups",
         "user_permissions",
     )
+
+
+@admin.register(UserPreferences)
+class UserPreferencesAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "date_format",
+        "decimal_format",
+        "time_zone",
+        "time_format",
+        "fiori_theme",
+        "show_timezone",
+    )
+    search_fields = ("user__username",)
