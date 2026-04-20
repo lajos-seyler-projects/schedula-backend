@@ -1,4 +1,4 @@
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
@@ -295,4 +295,48 @@ class GroupUsersViewSet(viewsets.ModelViewSet):
         group = get_object_or_404(Group, name=name)
         users = self.get_users(request)
         group.user_set.remove(*users)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupPermissionsViewSet(viewsets.ModelViewSet):
+    permission_classes = [UserHasPermission]
+    permission_map = {
+        "GET": None,
+        "POST": "users.manage_group_permissions",
+        "DELETE": "users.manage_group_permissions",
+    }
+    serializer_class = serializers.PermissionSerializer
+
+    def get_queryset(self):
+        name = self.kwargs.get("name")
+        group = get_object_or_404(Group, name=name)
+        return group.permissions.all()
+
+    def get_permission_objects(self, request):
+        permissions = request.data.get("permissions", [])
+        return Permission.objects.filter(id__in=permissions)
+
+    def create(self, request, name=None):
+        if not request.data.get("permissions"):
+            return Response(
+                {"permissions": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        permissions = self.get_permission_objects(request)
+        group.permissions.add(*permissions)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=["delete"], detail=False)
+    def delete(self, request, name=None):
+        if not request.data.get("permissions"):
+            return Response(
+                {"permissions": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        permissions = self.get_permission_objects(request)
+        group.permissions.remove(*permissions)
         return Response(status=status.HTTP_204_NO_CONTENT)
