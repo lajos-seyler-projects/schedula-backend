@@ -1,3 +1,14 @@
+## 0.9.0 (2026-04-20)
+
+### Feat
+
+- add group permissions API endpoint
+- add group users API endpoint
+- add user groups API endpoint
+- update User serializers to have uuid field instead of id
+- add groups API endpoint
+- add permissions API endpoint
+
 ## 0.8.0 (2026-04-17)
 
 ### Feat
