@@ -10,6 +10,11 @@ router = DefaultRouter()
 router.register(r"groups", views.GroupsViewSet, basename="groups")
 router.register(r"permissions", views.PermissionsViewSet, basename="permissions")
 router.register(r"users", views.UsersViewSet, basename="users")
+router.register(
+    r"users/(?P<uuid>[^/.]+)/groups",
+    views.UserGroupsViewSet,
+    basename="user_groups",
+)
 router.register(r"me", views.UserPreferencesViewSet, basename="me")
 
 urlpatterns = [

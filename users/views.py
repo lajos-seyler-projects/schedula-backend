@@ -16,6 +16,7 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefreshView
 
+from common.permissions import UserHasPermission
 from common.serializers import ChoiceSerializer
 from config.schema import extend_api_schema
 
@@ -204,3 +205,50 @@ class GroupsViewSet(viewsets.ModelViewSet):
         if self.request.query_params.get("slim") == "true":
             return serializers.GroupSlimSerializer
         return serializers.GroupSerializer
+
+
+class UserGroupsViewSet(viewsets.ModelViewSet):
+    permission_classes = [UserHasPermission]
+    permission_map = {
+        "GET": None,
+        "POST": "users.manage_user_groups",
+        "DELETE": "users.manage_user_groups",
+    }
+    serializer_class = serializers.GroupSerializer
+
+    def get_queryset(self):
+        uuid = self.kwargs.get("uuid")
+        user = get_object_or_404(User, uuid=uuid)
+        return user.groups.annotate(
+            user_count=Count("user", distinct=True),
+            permission_count=Count("permissions", distinct=True),
+        ).order_by("name")
+
+    def get_groups(self, request):
+        group_ids = request.data.get("groups", [])
+        return Group.objects.filter(id__in=group_ids)
+
+    def create(self, request, uuid=None):
+        if not request.data.get("groups"):
+            return Response(
+                {"groups": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(User, uuid=uuid)
+        groups = self.get_groups(request)
+        user.groups.add(*groups)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=["delete"], detail=False)
+    def delete(self, request, uuid=None):
+        if not request.data.get("groups"):
+            return Response(
+                {"groups": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(User, uuid=uuid)
+        groups = self.get_groups(request)
+        user.groups.remove(*groups)
+        return Response(status=status.HTTP_204_NO_CONTENT)
