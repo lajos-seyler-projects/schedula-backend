@@ -1,3 +1,5 @@
+from django.contrib.auth.models import Group
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
@@ -183,3 +185,22 @@ class PermissionsViewSet(viewsets.ReadOnlyModelViewSet):
         return get_filtered_permissions_by_exclusions().order_by(
             "content_type__app_label", "content_type", "codename"
         )
+
+
+class GroupsViewSet(viewsets.ModelViewSet):
+    lookup_field = "name"
+    filterset_class = filters.GroupFilter
+
+    def get_queryset(self):
+        if self.request.query_params.get("slim") == "true":
+            return Group.objects.order_by("name")
+
+        return Group.objects.annotate(
+            user_count=Count("user", distinct=True),
+            permission_count=Count("permissions", distinct=True),
+        ).order_by("name")
+
+    def get_serializer_class(self):
+        if self.request.query_params.get("slim") == "true":
+            return serializers.GroupSlimSerializer
+        return serializers.GroupSerializer

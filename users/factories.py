@@ -1,5 +1,6 @@
 import factory
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Group
 from factory import fuzzy
 
 from users.models import User, UserPreferences
@@ -38,3 +39,10 @@ class UserPreferencesFactory(factory.django.DjangoModelFactory):
     decimal_format = fuzzy.FuzzyChoice(UserPreferences.DecimalFormatChoices)
     time_format = fuzzy.FuzzyChoice(UserPreferences.TimeFormatChoices)
     fiori_theme = fuzzy.FuzzyChoice(UserPreferences.FioriThemeChoices)
+
+
+class GroupFactory(factory.django.DjangoModelFactory):
+    name = fuzzy.FuzzyText()
+
+    class Meta:
+        model = Group
