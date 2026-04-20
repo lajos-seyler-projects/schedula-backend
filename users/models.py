@@ -36,6 +36,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         ordering = ["username"]
+        permissions = [
+            ("manage_user_groups", "Can manage the groups of a user"),
+            ("manage_group_permissions", "Can manage the permissions of a group"),
+        ]
 
     def __str__(self):
         return f"User username={self.username} email={self.email}"

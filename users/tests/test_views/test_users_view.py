@@ -83,7 +83,7 @@ class TestListEndpoint:
     def test_users_uses_slim_serializer_fields(self, user_drf_client):
         response = user_drf_client.get(USERS_URL)
         assert set(response.data["results"][0].keys()) == {
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
@@ -106,7 +106,7 @@ class TestRetrieveEndpoint:
         url = get_user_detail_url(user.uuid)
         response = user_drf_client.get(url)
         expected_fields = {
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
@@ -142,7 +142,7 @@ class TestCreateEndpoint:
         assert response.status_code == status.HTTP_201_CREATED
         assert User.objects.filter(username="newUser").exists()
         assert set(response.data.keys()) == {
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
@@ -185,7 +185,7 @@ class TestUpdateEndpoint:
         response = client.patch(url, {"first_name": "Updated"})
         assert response.status_code == status.HTTP_200_OK
         assert set(response.data.keys()) == {
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
@@ -210,7 +210,7 @@ class TestUpdateEndpoint:
         )
         assert response.status_code == status.HTTP_200_OK
         assert set(response.data.keys()) == {
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",

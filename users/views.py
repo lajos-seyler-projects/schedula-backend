@@ -1,3 +1,5 @@
+from django.contrib.auth.models import Group, Permission
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
@@ -14,12 +16,17 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefreshView
 
+from common.permissions import UserHasPermission
 from common.serializers import ChoiceSerializer
 from config.schema import extend_api_schema
 
-from . import serializers
+from . import filters, serializers
 from .models import User, UserPreferences
-from .utils import build_timezone_response, send_registration_email
+from .utils import (
+    build_timezone_response,
+    get_filtered_permissions_by_exclusions,
+    send_registration_email,
+)
 
 
 class RegisterView(viewsets.generics.CreateAPIView):
@@ -169,3 +176,167 @@ class UserPreferencesViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class PermissionsViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = serializers.PermissionSerializer
+    filterset_class = filters.PermissionFilter
+
+    def get_queryset(self):
+        return get_filtered_permissions_by_exclusions().order_by(
+            "content_type__app_label", "content_type", "codename"
+        )
+
+
+class GroupsViewSet(viewsets.ModelViewSet):
+    lookup_field = "name"
+    filterset_class = filters.GroupFilter
+
+    def get_queryset(self):
+        if self.request.query_params.get("slim") == "true":
+            return Group.objects.order_by("name")
+
+        return Group.objects.annotate(
+            user_count=Count("user", distinct=True),
+            permission_count=Count("permissions", distinct=True),
+        ).order_by("name")
+
+    def get_serializer_class(self):
+        if self.request.query_params.get("slim") == "true":
+            return serializers.GroupSlimSerializer
+        return serializers.GroupSerializer
+
+
+class UserGroupsViewSet(viewsets.ModelViewSet):
+    permission_classes = [UserHasPermission]
+    permission_map = {
+        "GET": None,
+        "POST": "users.manage_user_groups",
+        "DELETE": "users.manage_user_groups",
+    }
+    serializer_class = serializers.GroupSerializer
+
+    def get_queryset(self):
+        uuid = self.kwargs.get("uuid")
+        user = get_object_or_404(User, uuid=uuid)
+        return user.groups.annotate(
+            user_count=Count("user", distinct=True),
+            permission_count=Count("permissions", distinct=True),
+        ).order_by("name")
+
+    def get_groups(self, request):
+        group_ids = request.data.get("groups", [])
+        return Group.objects.filter(id__in=group_ids)
+
+    def create(self, request, uuid=None):
+        if not request.data.get("groups"):
+            return Response(
+                {"groups": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(User, uuid=uuid)
+        groups = self.get_groups(request)
+        user.groups.add(*groups)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=["delete"], detail=False)
+    def delete(self, request, uuid=None):
+        if not request.data.get("groups"):
+            return Response(
+                {"groups": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(User, uuid=uuid)
+        groups = self.get_groups(request)
+        user.groups.remove(*groups)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupUsersViewSet(viewsets.ModelViewSet):
+    permission_classes = [UserHasPermission]
+    permission_map = {
+        "GET": None,
+        "POST": "users.manage_user_groups",
+        "DELETE": "users.manage_user_groups",
+    }
+    serializer_class = serializers.UserSlimSerializer
+
+    def get_queryset(self):
+        name = self.kwargs.get("name")
+        group = get_object_or_404(Group, name=name)
+        return group.user_set.all()
+
+    def get_users(self, request):
+        user_uuids = request.data.get("users", [])
+        return User.objects.filter(uuid__in=user_uuids)
+
+    def create(self, request, name=None):
+        if not request.data.get("users"):
+            return Response(
+                {"users": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        users = self.get_users(request)
+        group.user_set.add(*users)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=["delete"], detail=False)
+    def delete(self, request, name=None):
+        if not request.data.get("users"):
+            return Response(
+                {"users": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        users = self.get_users(request)
+        group.user_set.remove(*users)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupPermissionsViewSet(viewsets.ModelViewSet):
+    permission_classes = [UserHasPermission]
+    permission_map = {
+        "GET": None,
+        "POST": "users.manage_group_permissions",
+        "DELETE": "users.manage_group_permissions",
+    }
+    serializer_class = serializers.PermissionSerializer
+
+    def get_queryset(self):
+        name = self.kwargs.get("name")
+        group = get_object_or_404(Group, name=name)
+        return group.permissions.all()
+
+    def get_permission_objects(self, request):
+        permissions = request.data.get("permissions", [])
+        return Permission.objects.filter(id__in=permissions)
+
+    def create(self, request, name=None):
+        if not request.data.get("permissions"):
+            return Response(
+                {"permissions": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        permissions = self.get_permission_objects(request)
+        group.permissions.add(*permissions)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=["delete"], detail=False)
+    def delete(self, request, name=None):
+        if not request.data.get("permissions"):
+            return Response(
+                {"permissions": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        permissions = self.get_permission_objects(request)
+        group.permissions.remove(*permissions)
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -7,7 +7,24 @@ from . import views
 app_name = "users"
 
 router = DefaultRouter()
+router.register(r"groups", views.GroupsViewSet, basename="groups")
+router.register(
+    r"groups/(?P<name>[^/.]+)/permissions",
+    views.GroupPermissionsViewSet,
+    basename="group_permissions",
+)
+router.register(
+    r"groups/(?P<name>[^/.]+)/users",
+    views.GroupUsersViewSet,
+    basename="group_users",
+)
+router.register(r"permissions", views.PermissionsViewSet, basename="permissions")
 router.register(r"users", views.UsersViewSet, basename="users")
+router.register(
+    r"users/(?P<uuid>[^/.]+)/groups",
+    views.UserGroupsViewSet,
+    basename="user_groups",
+)
 router.register(r"me", views.UserPreferencesViewSet, basename="me")
 
 urlpatterns = [

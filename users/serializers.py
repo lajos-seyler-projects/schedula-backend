@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group, Permission
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as DefaultTokenObtainPairSerializer,
@@ -77,7 +78,7 @@ class UserSlimSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
@@ -90,7 +91,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
@@ -130,3 +131,33 @@ class UserPreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPreferences
         exclude = ("user",)
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    user_count = serializers.SerializerMethodField(read_only=True)
+    content_type = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Permission
+        fields = "__all__"
+
+    def get_content_type(self, obj):
+        return str(obj.content_type).title()
+
+    def get_user_count(self, obj):
+        return obj.user_set.count()
+
+
+class GroupSlimSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ["id", "name"]
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    user_count = serializers.IntegerField(read_only=True)
+    permission_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ["id", "name", "user_count", "permission_count"]

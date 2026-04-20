@@ -1,6 +1,9 @@
 import factory
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from factory import fuzzy
+from factory.django import DjangoModelFactory
 
 from users.models import User, UserPreferences
 
@@ -38,3 +41,29 @@ class UserPreferencesFactory(factory.django.DjangoModelFactory):
     decimal_format = fuzzy.FuzzyChoice(UserPreferences.DecimalFormatChoices)
     time_format = fuzzy.FuzzyChoice(UserPreferences.TimeFormatChoices)
     fiori_theme = fuzzy.FuzzyChoice(UserPreferences.FioriThemeChoices)
+
+
+class GroupFactory(factory.django.DjangoModelFactory):
+    name = fuzzy.FuzzyText()
+
+    class Meta:
+        model = Group
+
+
+class ContentTypeFactory(DjangoModelFactory):
+    class Meta:
+        model = ContentType
+        django_get_or_create = ("app_label", "model")
+
+    app_label = factory.Sequence(lambda n: f"app_{n}")
+    model = factory.Sequence(lambda n: f"model_{n}")
+
+
+class PermissionFactory(DjangoModelFactory):
+    class Meta:
+        model = Permission
+        django_get_or_create = ("content_type", "codename")
+
+    name = factory.Sequence(lambda n: f"Permission {n}")
+    content_type = factory.SubFactory(ContentTypeFactory)
+    codename = factory.Sequence(lambda n: f"permission_{n}")
