@@ -7,6 +7,7 @@ from . import views
 app_name = "users"
 
 router = DefaultRouter()
+router.register(r"permissions", views.PermissionsViewSet, basename="permissions")
 router.register(r"users", views.UsersViewSet, basename="users")
 router.register(r"me", views.UserPreferencesViewSet, basename="me")
 

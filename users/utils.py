@@ -3,7 +3,13 @@ from datetime import datetime
 from zoneinfo import ZoneInfo, available_timezones
 
 from django.conf import settings
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
+from django.db.models import Value
+from django.db.models.functions import Concat
+
+from common.utils import get_excluded_content_types
 
 
 def get_registration_email_html(user):
@@ -114,3 +120,13 @@ def build_timezone_response():
         )
 
     return grouped
+
+
+def get_filtered_permissions_by_exclusions():
+    excluded_content_types = get_excluded_content_types()
+
+    excluded_content_type_objects = ContentType.objects.annotate(
+        full_label=Concat("app_label", Value("."), "model")
+    ).filter(full_label__in=excluded_content_types)
+
+    return Permission.objects.exclude(content_type__in=excluded_content_type_objects)

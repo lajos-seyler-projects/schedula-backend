@@ -17,9 +17,13 @@ from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefre
 from common.serializers import ChoiceSerializer
 from config.schema import extend_api_schema
 
-from . import serializers
+from . import filters, serializers
 from .models import User, UserPreferences
-from .utils import build_timezone_response, send_registration_email
+from .utils import (
+    build_timezone_response,
+    get_filtered_permissions_by_exclusions,
+    send_registration_email,
+)
 
 
 class RegisterView(viewsets.generics.CreateAPIView):
@@ -169,3 +173,13 @@ class UserPreferencesViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class PermissionsViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = serializers.PermissionSerializer
+    filterset_class = filters.PermissionFilter
+
+    def get_queryset(self):
+        return get_filtered_permissions_by_exclusions().order_by(
+            "content_type__app_label", "content_type", "codename"
+        )

@@ -25,6 +25,12 @@ def user(db):  # noqa: ARG001
 
 
 @pytest.fixture
+def superuser(db):
+    """Creates a superuser"""
+    return UserFactory.create(is_superuser=True, is_active=True)
+
+
+@pytest.fixture
 def drf_client():
     """DRF API test client that not authenticated with a user"""
     return APIClient()
