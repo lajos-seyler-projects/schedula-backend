@@ -252,3 +252,47 @@ class UserGroupsViewSet(viewsets.ModelViewSet):
         groups = self.get_groups(request)
         user.groups.remove(*groups)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GroupUsersViewSet(viewsets.ModelViewSet):
+    permission_classes = [UserHasPermission]
+    permission_map = {
+        "GET": None,
+        "POST": "users.manage_user_groups",
+        "DELETE": "users.manage_user_groups",
+    }
+    serializer_class = serializers.UserSlimSerializer
+
+    def get_queryset(self):
+        name = self.kwargs.get("name")
+        group = get_object_or_404(Group, name=name)
+        return group.user_set.all()
+
+    def get_users(self, request):
+        user_uuids = request.data.get("users", [])
+        return User.objects.filter(uuid__in=user_uuids)
+
+    def create(self, request, name=None):
+        if not request.data.get("users"):
+            return Response(
+                {"users": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        users = self.get_users(request)
+        group.user_set.add(*users)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=["delete"], detail=False)
+    def delete(self, request, name=None):
+        if not request.data.get("users"):
+            return Response(
+                {"users": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        group = get_object_or_404(Group, name=name)
+        users = self.get_users(request)
+        group.user_set.remove(*users)
+        return Response(status=status.HTTP_204_NO_CONTENT)

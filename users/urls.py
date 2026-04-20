@@ -8,6 +8,11 @@ app_name = "users"
 
 router = DefaultRouter()
 router.register(r"groups", views.GroupsViewSet, basename="groups")
+router.register(
+    r"groups/(?P<name>[^/.]+)/users",
+    views.GroupUsersViewSet,
+    basename="group_users",
+)
 router.register(r"permissions", views.PermissionsViewSet, basename="permissions")
 router.register(r"users", views.UsersViewSet, basename="users")
 router.register(
