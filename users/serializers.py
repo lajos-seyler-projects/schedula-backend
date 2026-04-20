@@ -78,7 +78,7 @@ class UserSlimSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
@@ -91,7 +91,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",
+            "uuid",
             "username",
             "email",
             "first_name",
