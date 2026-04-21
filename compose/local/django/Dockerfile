@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 COPY ./pyproject.toml ./uv.lock ./
 
-RUN pip install uv==0.5.4
+RUN pip install uv==0.11.7
 RUN uv export > ${BUILD_ENVIRONMENT}.txt 
 
 # Create Python Dependency and Sub-Dependency Wheels.
