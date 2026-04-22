@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from users.models import User
+
 from . import models
 
 
@@ -32,3 +34,13 @@ class FilterDefinitionSerializer(serializers.ModelSerializer):
         if user_preference:
             return user_preference.is_visible
         return obj.is_visible_by_default
+
+
+class UserFilterPreferenceSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=False
+    )
+
+    class Meta:
+        model = models.UserFilterPreference
+        fields = "__all__"

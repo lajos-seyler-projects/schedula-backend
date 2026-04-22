@@ -120,3 +120,80 @@ class FilterDefinitionsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.FilterDefinitionSerializer
     filterset_class = filters.FilterDefinitionFilter
     pagination_class = None
+
+
+class UserFilterPreferencesUpdateView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.UserFilterPreferenceSerializer
+
+    @transaction.atomic
+    def put(self, request, *args, **kwargs):
+        """
+        Bulk create or update user filter preferences for a specific table.
+
+        Request body example:
+        {
+            "table_id": "users",
+            "filter_preferences": [
+                {"name": "username", "is_visible": true},
+                {"name": "first_naem", "is_visible": false},
+                {"name": "is_superuser", "is_visible": true}
+            ]
+        }
+        """
+        table_id = request.data.get("table_id")
+        filter_preferences = request.data.get("filter_preferences", [])
+        errors = {}
+
+        if not table_id:
+            errors["table_id"] = ["This field is required."]
+        if not filter_preferences:
+            errors["filter_preferences"] = ["This field is required."]
+
+        validated_data, missing_filters = self.validate_filter_preferences(
+            request.user, table_id, filter_preferences
+        )
+        if missing_filters:
+            filters_text = [
+                f"{table_id}:{filter_name}" for table_id, filter_name in missing_filters
+            ]
+            errors["detail"] = f"Missing filter definitions: {', '.join(filters_text)}"
+        if errors:
+            return Response(
+                errors,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        models.UserFilterPreference.objects.filter(
+            user=request.user, filter_definition__table_id=table_id
+        ).delete()
+        preferences = [models.UserFilterPreference(**item) for item in validated_data]
+        created_preferences = models.UserFilterPreference.objects.bulk_create(
+            preferences,
+            update_conflicts=True,
+            unique_fields=["user", "filter_definition"],
+            update_fields=["is_visible"],
+        )
+        serializer = self.get_serializer(created_preferences, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def validate_filter_preferences(self, user, table_id, filter_preferences):
+        validated_data = []
+        missing_filters = []
+        for item in filter_preferences:
+            name = item.get("name")
+            is_visible = item.get("is_visible", True)
+            try:
+                filter_definition = models.FilterDefinition.objects.get(
+                    table_id=table_id, name=name
+                )
+                validated_data.append(
+                    {
+                        "user": user,
+                        "filter_definition": filter_definition,
+                        "is_visible": is_visible,
+                    }
+                )
+            except models.FilterDefinition.DoesNotExist:
+                missing_filters.append((table_id, name))
+        return validated_data, missing_filters

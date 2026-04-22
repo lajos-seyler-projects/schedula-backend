@@ -29,3 +29,12 @@ class FilterDefinitionFactory(DjangoModelFactory):
     query_parameter = factory.LazyAttribute(lambda obj: obj.name)
     required = False
     is_visible_by_default = True
+
+
+class UserFilterPreferenceFactory(DjangoModelFactory):
+    class Meta:
+        model = models.UserFilterPreference
+
+    user = factory.SubFactory(UserFactory)
+    filter_definition = factory.SubFactory(FilterDefinitionFactory)
+    is_visible = True

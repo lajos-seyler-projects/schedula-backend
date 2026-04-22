@@ -23,4 +23,9 @@ urlpatterns = [
         views.DefaultColumnPreferencesView.as_view(),
         name="default-column-preferences",
     ),
+    path(
+        "user-filter-preferences/",
+        views.UserFilterPreferencesUpdateView.as_view(),
+        name="update-user-filter-preferences",
+    ),
 ]
