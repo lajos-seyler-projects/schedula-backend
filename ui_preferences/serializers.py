@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from . import models
+
 
 class DefaultColumnPreferenceSerializer(serializers.Serializer):
     table_id = serializers.CharField()
@@ -7,3 +9,9 @@ class DefaultColumnPreferenceSerializer(serializers.Serializer):
     expression = serializers.JSONField()
     label = serializers.CharField()
     is_visible = serializers.BooleanField()
+
+
+class UserColumnPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserColumnPreference
+        fields = "__all__"
