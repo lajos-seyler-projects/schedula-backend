@@ -115,6 +115,7 @@ class CurrentUserRetrieveUpdateViewSet(
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
+    filterset_class = filters.UserFilter
     lookup_field = "uuid"
 
     def get_serializer_class(self):
