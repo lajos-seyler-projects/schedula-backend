@@ -3,12 +3,12 @@ from factory.django import DjangoModelFactory
 
 from users.factories import UserFactory
 
-from .models import UserColumnPreference
+from . import models
 
 
 class UserColumnPreferenceFactory(DjangoModelFactory):
     class Meta:
-        model = UserColumnPreference
+        model = models.UserColumnPreference
 
     user = factory.SubFactory(UserFactory)
     table_id = "users"
@@ -17,3 +17,15 @@ class UserColumnPreferenceFactory(DjangoModelFactory):
     label = factory.LazyAttribute(lambda obj: obj.key.replace("_", " ").title())
     is_visible = True
     order = factory.Sequence(lambda n: n)
+
+
+class FilterDefinitionFactory(DjangoModelFactory):
+    class Meta:
+        model = models.FilterDefinition
+
+    table_id = "users"
+    name = factory.Sequence(lambda n: f"filter_{n}")
+    label = factory.LazyAttribute(lambda obj: obj.name.replace("_", " ").title())
+    query_parameter = factory.LazyAttribute(lambda obj: obj.name)
+    required = False
+    is_visible_by_default = True

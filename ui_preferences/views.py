@@ -112,3 +112,11 @@ class UserColumnPreferencesViewSet(
                 if col["key"] == key:
                     item["expression"] = col["expression"]
                     break
+
+
+class FilterDefinitionsViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = models.FilterDefinition.objects.all()
+    serializer_class = serializers.FilterDefinitionSerializer
+    filterset_class = filters.FilterDefinitionFilter
+    pagination_class = None

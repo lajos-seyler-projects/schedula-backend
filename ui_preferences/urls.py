@@ -8,6 +8,9 @@ app_name = "ui_preferences"
 
 router = SimpleRouter()
 router.register(
+    r"filter-definitions", views.FilterDefinitionsViewSet, basename="filter-definitions"
+)
+router.register(
     r"user-column-preferences",
     views.UserColumnPreferencesViewSet,
     basename="user-column-preferences",
