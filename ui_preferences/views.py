@@ -1,7 +1,9 @@
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 
 from . import filters, models, serializers
@@ -197,3 +199,33 @@ class UserFilterPreferencesUpdateView(GenericAPIView):
             except models.FilterDefinition.DoesNotExist:
                 missing_filters.append((table_id, name))
         return validated_data, missing_filters
+
+
+class FilterVariantsViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.FilterVariantSerializer
+    pagination_class = None
+    filterset_class = filters.FilterVariantFilter
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        if self.request.method in SAFE_METHODS:
+            return models.FilterVariant.objects.filter(
+                Q(created_by=self.request.user) | Q(created_by__isnull=True)
+            )
+        return models.FilterVariant.objects.filter(created_by=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=False, methods=["put"], url_path=r"(?P<table_id>[^/.]+)/default")
+    def set_default(self, request, table_id):
+        serializer = serializers.UserDefaultFilterVariantSerializer(
+            data=request.data, context={"request": request, "table_id": table_id}
+        )
+        serializer.is_valid(raise_exception=True)
+        models.UserDefaultFilterVariant.objects.filter(
+            user=request.user, filter_variant__table_id=table_id
+        ).delete()
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

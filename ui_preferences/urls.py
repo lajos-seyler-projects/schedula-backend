@@ -15,6 +15,9 @@ router.register(
     views.UserColumnPreferencesViewSet,
     basename="user-column-preferences",
 )
+router.register(
+    r"filter-variants", views.FilterVariantsViewSet, basename="filter-variants"
+)
 
 urlpatterns = [
     path("", include(router.urls)),

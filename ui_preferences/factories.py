@@ -38,3 +38,16 @@ class UserFilterPreferenceFactory(DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     filter_definition = factory.SubFactory(FilterDefinitionFactory)
     is_visible = True
+
+
+class FilterVariantFactory(DjangoModelFactory):
+    class Meta:
+        model = models.FilterVariant
+
+    table_id = "users"
+    name = factory.Sequence(lambda n: f"variant_{n}")
+    filters = factory.Dict({})
+    exclude_filters = factory.Dict({})
+    is_public = False
+    execute_on_selection = False
+    created_by = factory.SubFactory(UserFactory)
