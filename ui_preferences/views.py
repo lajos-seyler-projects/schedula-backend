@@ -47,6 +47,9 @@ class UserColumnPreferencesViewSet(
     pagination_class = None
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return models.UserColumnPreference.objects.none()
+
         return models.UserColumnPreference.objects.filter(user=self.request.user)
 
     @transaction.atomic
@@ -209,6 +212,9 @@ class FilterVariantsViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return models.FilterVariant.objects.none()
+
         if self.request.method in SAFE_METHODS:
             return models.FilterVariant.objects.filter(
                 Q(created_by=self.request.user) | Q(created_by__isnull=True)

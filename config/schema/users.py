@@ -7,4 +7,5 @@ VIEWSET_SCHEMAS: ViewSetSchemasType = {
     },
     "UserGroupsViewSet": {"parameters": [parameters.user_uuid_param]},
     "GroupUsersViewSet": {"parameters": [parameters.group_name_param]},
+    "GroupPermissionsViewSet": {"parameters": [parameters.group_name_param]},
 }

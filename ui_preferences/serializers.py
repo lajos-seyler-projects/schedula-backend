@@ -27,7 +27,7 @@ class FilterDefinitionSerializer(serializers.ModelSerializer):
         model = models.FilterDefinition
         fields = ["id", "name", "label", "query_parameter", "required", "is_visible"]
 
-    def get_is_visible(self, obj):
+    def get_is_visible(self, obj) -> bool:
         user = self.context.get("request").user
         user_preference = models.UserFilterPreference.objects.filter(
             user=user, filter_definition=obj
@@ -66,7 +66,7 @@ class FilterVariantSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["uuid", "slug", "is_default", "created_by"]
 
-    def get_is_default(self, obj):
+    def get_is_default(self, obj) -> bool:
         user = self.context.get("request").user
         return models.UserDefaultFilterVariant.objects.filter(
             user=user, filter_variant=obj

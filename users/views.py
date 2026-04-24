@@ -307,6 +307,7 @@ class GroupUsersViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_api_schema("GroupPermissionsViewSet")
 class GroupPermissionsViewSet(viewsets.ModelViewSet):
     permission_classes = [UserHasPermission]
     permission_map = {
@@ -317,6 +318,9 @@ class GroupPermissionsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.PermissionSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Permission.objects.none()
+
         name = self.kwargs.get("name")
         group = get_object_or_404(Group, name=name)
         return group.permissions.all()

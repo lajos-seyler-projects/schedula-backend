@@ -141,10 +141,10 @@ class PermissionSerializer(serializers.ModelSerializer):
         model = Permission
         fields = "__all__"
 
-    def get_content_type(self, obj):
+    def get_content_type(self, obj) -> str:
         return str(obj.content_type).title()
 
-    def get_user_count(self, obj):
+    def get_user_count(self, obj) -> int:
         return obj.user_set.count()
 
 
