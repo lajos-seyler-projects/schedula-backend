@@ -208,6 +208,7 @@ class GroupsViewSet(viewsets.ModelViewSet):
         return serializers.GroupSerializer
 
 
+@extend_api_schema("UserGroupsViewSet")
 class UserGroupsViewSet(viewsets.ModelViewSet):
     permission_classes = [UserHasPermission]
     permission_map = {
@@ -218,6 +219,9 @@ class UserGroupsViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.GroupSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Group.objects.none()
+
         uuid = self.kwargs.get("uuid")
         user = get_object_or_404(User, uuid=uuid)
         return user.groups.annotate(
