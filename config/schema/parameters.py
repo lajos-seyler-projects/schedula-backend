@@ -13,3 +13,9 @@ user_token_param = OpenApiParameter(
     location=OpenApiParameter.PATH,
     description="Activation token of the User.",
 )
+group_name_param = OpenApiParameter(
+    name="name",
+    type=OpenApiTypes.STR,
+    location=OpenApiParameter.PATH,
+    description="Name of the group.",
+)
