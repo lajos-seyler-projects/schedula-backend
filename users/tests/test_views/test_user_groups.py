@@ -21,23 +21,17 @@ def test_user_groups_list_GET(user, auth_drf_client):
 
 def test_user_groups_POST_and_DELETE_requires_permission(user, user_drf_client):
     target = GroupFactory()
-    response = user_drf_client.post(
-        get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json"
-    )
+    response = user_drf_client.post(get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    response = user_drf_client.delete(
-        get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json"
-    )
+    response = user_drf_client.delete(get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 def test_user_groups_list_POST(user, auth_drf_client):
     target = GroupFactory()
     client, _ = auth_drf_client("users.manage_user_groups", user=user)
-    response = client.post(
-        get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json"
-    )
+    response = client.post(get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json")
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert user.groups.count() == 1
     assert user.groups.filter(id=target.id).exists()
@@ -49,9 +43,7 @@ def test_user_groups_list_DELETE(user, auth_drf_client):
     user.groups.add(target, other_group)
     assert user.groups.count() == 2
     client, _ = auth_drf_client("users.manage_user_groups", user=user)
-    response = client.delete(
-        get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json"
-    )
+    response = client.delete(get_user_groups_url(user.uuid), data={"groups": [target.id]}, format="json")
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert user.groups.count() == 1
     assert user.groups.filter(id=target.id).exists() is False

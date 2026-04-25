@@ -19,12 +19,7 @@ def test_groups_url_GET(auth_drf_client):
     response = client.get(GROUPS_URL)
     assert response.status_code == status.HTTP_200_OK
     assert response.data["count"] == 3
-    assert set(response.data["results"][0].keys()) == {
-        "id",
-        "name",
-        "user_count",
-        "permission_count",
-    }
+    assert set(response.data["results"][0].keys()) == {"id", "name", "user_count", "permission_count"}
 
 
 @pytest.mark.django_db
@@ -60,11 +55,7 @@ def test_groups_url_POST_duplicate(auth_drf_client):
 def test_groups_url_PATCH(auth_drf_client):
     target = GroupFactory(name="target")
     client, _ = auth_drf_client("auth.change_group")
-    response = client.patch(
-        get_group_details_url(target.name),
-        data={"name": "updated group"},
-        format="json",
-    )
+    response = client.patch(get_group_details_url(target.name), data={"name": "updated group"}, format="json")
     assert response.status_code == status.HTTP_200_OK
     target.refresh_from_db()
     assert target.name == "updated group"

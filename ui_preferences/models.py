@@ -17,34 +17,22 @@ class FilterVariant(models.Model):
     is_public = models.BooleanField(default=False)
     execute_on_selection = models.BooleanField(default=False)
     created_by = models.ForeignKey(
-        User,
-        related_name="filter_variants",
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
+        User, related_name="filter_variants", on_delete=models.CASCADE, blank=True, null=True
     )
 
     class Meta:
         verbose_name = "Filter Variant"
         verbose_name_plural = "Filter Variants"
         constraints = [
-            models.UniqueConstraint(
-                fields=["table_id", "name", "created_by"],
-                name="unique_variant_per_user",
-            ),
-            models.UniqueConstraint(
-                fields=["table_id", "slug", "created_by"],
-                name="unique_slug_per_user",
-            ),
+            models.UniqueConstraint(fields=["table_id", "name", "created_by"], name="unique_variant_per_user"),
+            models.UniqueConstraint(fields=["table_id", "slug", "created_by"], name="unique_slug_per_user"),
         ]
 
     def __str__(self):
         return f"Filter Variant - {self.name} ({self.table_id}, user={self.created_by})"
 
     def save(self, *args, **kwargs):
-        existing = FilterVariant.objects.filter(
-            table_id=self.table_id, created_by=self.created_by
-        )
+        existing = FilterVariant.objects.filter(table_id=self.table_id, created_by=self.created_by)
         if self.pk:
             existing = existing.exclude(pk=self.pk)
 
@@ -61,12 +49,8 @@ class FilterVariant(models.Model):
 
 
 class UserDefaultFilterVariant(models.Model):
-    user = models.ForeignKey(
-        User, related_name="default_filter_variants", on_delete=models.CASCADE
-    )
-    filter_variant = models.ForeignKey(
-        FilterVariant, related_name="default_variants", on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(User, related_name="default_filter_variants", on_delete=models.CASCADE)
+    filter_variant = models.ForeignKey(FilterVariant, related_name="default_variants", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "User Default Filter Variant"
@@ -100,23 +84,15 @@ class FilterDefinition(models.Model):
     class Meta:
         verbose_name = "Filter Definition"
         verbose_name_plural = "Filter Definitions"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["table_id", "name"], name="unique_table_filter_definition"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["table_id", "name"], name="unique_table_filter_definition")]
 
     def __str__(self):
         return f"{self.table_id} - {self.name}"
 
 
 class UserFilterPreference(models.Model):
-    user = models.ForeignKey(
-        User, related_name="filter_preferences", on_delete=models.CASCADE
-    )
-    filter_definition = models.ForeignKey(
-        FilterDefinition, related_name="user_preferences", on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(User, related_name="filter_preferences", on_delete=models.CASCADE)
+    filter_definition = models.ForeignKey(FilterDefinition, related_name="user_preferences", on_delete=models.CASCADE)
     is_visible = models.BooleanField(default=True)
 
     class Meta:
@@ -124,8 +100,7 @@ class UserFilterPreference(models.Model):
         verbose_name_plural = "User Filter Preferences"
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "filter_definition"],
-                name="unique_user_filter_definition_preference",
+                fields=["user", "filter_definition"], name="unique_user_filter_definition_preference"
             )
         ]
 
@@ -134,9 +109,7 @@ class UserFilterPreference(models.Model):
 
 
 class UserColumnPreference(models.Model):
-    user = models.ForeignKey(
-        User, related_name="column_preferences", on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(User, related_name="column_preferences", on_delete=models.CASCADE)
     table_id = models.CharField(max_length=100)
     key = models.CharField(max_length=100)
     expression = models.JSONField(default=dict)
@@ -148,10 +121,7 @@ class UserColumnPreference(models.Model):
         verbose_name = "User Column Preferences"
         verbose_name_plural = "User Column Preferences"
         constraints = [
-            models.UniqueConstraint(
-                fields=["user", "table_id", "key"],
-                name="unique_user_table_column_preference",
-            )
+            models.UniqueConstraint(fields=["user", "table_id", "key"], name="unique_user_table_column_preference")
         ]
         ordering = ["user", "table_id", "order"]
 

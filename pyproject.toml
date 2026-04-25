@@ -60,8 +60,9 @@ exclude = [
 ]
 
 # Same as Black.
-line-length = 88
+line-length = 120
 indent-width = 4
+
 
 # Assume Python 3.9
 target-version = "py39"

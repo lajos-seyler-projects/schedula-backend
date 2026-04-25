@@ -6,11 +6,7 @@ pytestmark = pytest.mark.django_db
 ME_URL = reverse("users:me")
 
 
-def test_me_view_GET(
-    drf_client,
-    user,
-    user_drf_client,
-):
+def test_me_view_GET(drf_client, user, user_drf_client):
     unauthenticated_response = drf_client.get(ME_URL)
 
     assert unauthenticated_response.status_code == 401
@@ -44,9 +40,7 @@ def test_me_view_PATCH(user_drf_client, user, updated_field, updated_value):
         "last_name": user.last_name,
     }
 
-    response = user_drf_client.patch(
-        ME_URL, {updated_field: updated_value}, format="json"
-    )
+    response = user_drf_client.patch(ME_URL, {updated_field: updated_value}, format="json")
     assert response.status_code == 200
 
     user.refresh_from_db()

@@ -32,15 +32,7 @@ class UserFilterPreferenceAdmin(admin.ModelAdmin):
 
 @admin.register(models.UserColumnPreference)
 class UserColumnPreferenceAdmin(admin.ModelAdmin):
-    list_diplay = (
-        "user",
-        "table_id",
-        "key",
-        "expression",
-        "label",
-        "is_visible",
-        "order",
-    )
+    list_diplay = ("user", "table_id", "key", "expression", "label", "is_visible", "order")
     search_fields = ("user__username", "table_id", "key", "expression", "label")
     list_filter = ("is_visible",)
     ordering = ("user__username", "order")

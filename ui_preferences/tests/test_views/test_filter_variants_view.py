@@ -64,9 +64,7 @@ def test_filter_variants_POST(auth_drf_client):
     }
     response = client.post(FILTER_VARIANTS_URL, data=request_data, format="json")
     assert response.status_code == status.HTTP_201_CREATED
-    created_variant = FilterVariant.objects.filter(
-        created_by=user, table_id="target", name="New Variant"
-    )
+    created_variant = FilterVariant.objects.filter(created_by=user, table_id="target", name="New Variant")
     assert created_variant.exists()
     assert created_variant[0].filters["foo"] == "bar"
     assert created_variant[0].is_public is False
@@ -79,15 +77,11 @@ def test_filter_variants_default_PUT(auth_drf_client):
     url = get_filter_variants_default_url("target")
     response = client.put(url, data={"filter_variant_id": fv.uuid}, format="json")
     assert response.status_code == status.HTTP_200_OK
-    created_default_variant = UserDefaultFilterVariant.objects.filter(
-        user=user, filter_variant__table_id="target"
-    )
+    created_default_variant = UserDefaultFilterVariant.objects.filter(user=user, filter_variant__table_id="target")
     assert created_default_variant.exists()
 
 
-def test_filter_variants_default_PUT_does_not_allow_other_users_variant(
-    auth_drf_client,
-):
+def test_filter_variants_default_PUT_does_not_allow_other_users_variant(auth_drf_client):
     client, user = auth_drf_client()
     other_user = UserFactory()
     fv = FilterVariantFactory(created_by=other_user)
@@ -96,6 +90,4 @@ def test_filter_variants_default_PUT_does_not_allow_other_users_variant(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     data = response.json()
     assert "filter_variant_id" in data
-    assert data["filter_variant_id"] == [
-        "You do not have permission to use this filter variant."
-    ]
+    assert data["filter_variant_id"] == ["You do not have permission to use this filter variant."]

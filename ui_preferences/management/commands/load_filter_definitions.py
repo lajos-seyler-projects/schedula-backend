@@ -24,9 +24,5 @@ class Command(BaseCommand):
                 )
                 current_names.add(definition["name"])
 
-            FilterDefinition.objects.filter(table_id=table_id).exclude(
-                name__in=current_names
-            ).delete()
-            self.stdout.write(
-                self.style.SUCCESS(f"Loaded filter definitions for table: {table_id}")
-            )
+            FilterDefinition.objects.filter(table_id=table_id).exclude(name__in=current_names).delete()
+            self.stdout.write(self.style.SUCCESS(f"Loaded filter definitions for table: {table_id}"))

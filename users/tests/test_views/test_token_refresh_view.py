@@ -13,10 +13,7 @@ def test_token_refresh_view(drf_client, user):
     new_user.is_active = True
     new_user.save()
 
-    data = {
-        "email": new_user.email,
-        "password": user.password,
-    }
+    data = {"email": new_user.email, "password": user.password}
 
     response = drf_client.post(TOKEN_URL, data, format="json")
     assert response.status_code == 200

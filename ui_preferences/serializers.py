@@ -29,18 +29,14 @@ class FilterDefinitionSerializer(serializers.ModelSerializer):
 
     def get_is_visible(self, obj) -> bool:
         user = self.context.get("request").user
-        user_preference = models.UserFilterPreference.objects.filter(
-            user=user, filter_definition=obj
-        ).first()
+        user_preference = models.UserFilterPreference.objects.filter(user=user, filter_definition=obj).first()
         if user_preference:
             return user_preference.is_visible
         return obj.is_visible_by_default
 
 
 class UserFilterPreferenceSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=False
-    )
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
     class Meta:
         model = models.UserFilterPreference
@@ -68,19 +64,14 @@ class FilterVariantSerializer(serializers.ModelSerializer):
 
     def get_is_default(self, obj) -> bool:
         user = self.context.get("request").user
-        return models.UserDefaultFilterVariant.objects.filter(
-            user=user, filter_variant=obj
-        ).exists()
+        return models.UserDefaultFilterVariant.objects.filter(user=user, filter_variant=obj).exists()
 
 
 class UserDefaultFilterVariantSerializer(serializers.ModelSerializer):
     user = UserSlimSerializer(required=False, read_only=True)
     filter_variant = FilterVariantSerializer(read_only=True)
     filter_variant_id = serializers.PrimaryKeyRelatedField(
-        queryset=models.FilterVariant.objects.all(),
-        source="filter_variant",
-        write_only=True,
-        required=True,
+        queryset=models.FilterVariant.objects.all(), source="filter_variant", write_only=True, required=True
     )
 
     class Meta:
@@ -94,13 +85,9 @@ class UserDefaultFilterVariantSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Filter variant is required.")
         if value.table_id != table_id:
-            raise serializers.ValidationError(
-                "Filter variant does not match the table id in the URL."
-            )
+            raise serializers.ValidationError("Filter variant does not match the table id in the URL.")
         if value.created_by != user and value.created_by is not None:
-            raise serializers.ValidationError(
-                "You do not have permission to use this filter variant."
-            )
+            raise serializers.ValidationError("You do not have permission to use this filter variant.")
         return value
 
     def create(self, validated_data):

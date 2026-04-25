@@ -19,11 +19,4 @@ def test_filter_definitions_GET(user_drf_client):
     response = user_drf_client.get(f"{FILTER_DEFINITIONS_URL}?table_id=users")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) == 3
-    assert set(response.data[0].keys()) == {
-        "id",
-        "name",
-        "label",
-        "query_parameter",
-        "required",
-        "is_visible",
-    }
+    assert set(response.data[0].keys()) == {"id", "name", "label", "query_parameter", "required", "is_visible"}

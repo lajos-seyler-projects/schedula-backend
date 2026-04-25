@@ -25,9 +25,7 @@ def test_user_column_preferences_GET(auth_drf_client):
     response = client.get(f"{USER_COLUMN_PREFERENCES_URL}?table_id=users")
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) == 3
-    assert set(i["key"] for i in response.data) == set(
-        preference.key for preference in preferences
-    )
+    assert set(i["key"] for i in response.data) == set(preference.key for preference in preferences)
 
 
 def test_user_column_preferences_POST_missing_data(user_drf_client):
@@ -42,14 +40,9 @@ def test_user_column_preferences_POST_missing_data(user_drf_client):
 def test_user_column_preferences_POST_invalid_columns(user_drf_client):
     request_data = {
         "table_id": "users",
-        "column_preferences": [
-            {"key": "invalid1", "label": "Invalid1"},
-            {"key": "invalid2", "label": "Invalid2"},
-        ],
+        "column_preferences": [{"key": "invalid1", "label": "Invalid1"}, {"key": "invalid2", "label": "Invalid2"}],
     }
-    response = user_drf_client.post(
-        USER_COLUMN_PREFERENCES_URL, data=request_data, format="json"
-    )
+    response = user_drf_client.post(USER_COLUMN_PREFERENCES_URL, data=request_data, format="json")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "detail" in response.data
     assert response.data["detail"] == "Invalid column preferences: invalid1, invalid2"
@@ -65,16 +58,10 @@ def test_user_column_preferences_POST(auth_drf_client):
             {"key": "last_name", "label": "Last Name", "is_visible": True},
         ],
     }
-    response = client.post(
-        USER_COLUMN_PREFERENCES_URL, data=request_data, format="json"
-    )
+    response = client.post(USER_COLUMN_PREFERENCES_URL, data=request_data, format="json")
     assert response.status_code == status.HTTP_201_CREATED
     created_preferences = UserColumnPreference.objects.filter(user=user)
     assert created_preferences.count() == 3
-    assert set(created_preferences.values_list("key", flat=True)) == {
-        "username",
-        "first_name",
-        "last_name",
-    }
+    assert set(created_preferences.values_list("key", flat=True)) == {"username", "first_name", "last_name"}
     assert UserColumnPreference.objects.get(key="username").is_visible is False
     assert UserColumnPreference.objects.get(key="first_name").is_visible is True

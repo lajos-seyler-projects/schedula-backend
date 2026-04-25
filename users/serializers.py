@@ -1,8 +1,6 @@
 from django.contrib.auth.models import Group, Permission
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer as DefaultTokenObtainPairSerializer,
-)
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer as DefaultTokenObtainPairSerializer
 
 from .models import User, UserPreferences
 
@@ -10,13 +8,7 @@ from .models import User, UserPreferences
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            "username",
-            "email",
-            "password",
-            "first_name",
-            "last_name",
-        )
+        fields = ("username", "email", "password", "first_name", "last_name")
         extra_kwargs = {
             "username": {"required": True},
             "email": {"required": True},
@@ -50,13 +42,7 @@ class TokenObtainPairSerializer(DefaultTokenObtainPairSerializer):
 class UserMeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "password",
-        )
+        fields = ("username", "email", "first_name", "last_name", "password")
         extra_kwargs = {
             "username": {"required": False},
             "email": {"required": False},
@@ -77,55 +63,25 @@ class UserMeSerializer(serializers.ModelSerializer):
 class UserSlimSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            "uuid",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_superuser",
-        )
+        fields = ("uuid", "username", "email", "first_name", "last_name", "is_superuser")
 
 
 class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = (
-            "uuid",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_superuser",
-            "date_joined",
-            "last_login",
-        )
+        fields = ("uuid", "username", "email", "first_name", "last_name", "is_superuser", "date_joined", "last_login")
 
 
 class UserPreferencesSerializer(serializers.ModelSerializer):
     date_format = serializers.ChoiceField(choices=UserPreferences.DateFormatChoices)
-    date_format_display = serializers.CharField(
-        source="get_date_format_display",
-        read_only=True,
-    )
-    decimal_format = serializers.ChoiceField(
-        choices=UserPreferences.DecimalFormatChoices
-    )
-    decimal_format_display = serializers.CharField(
-        source="get_decimal_format_display",
-        read_only=True,
-    )
+    date_format_display = serializers.CharField(source="get_date_format_display", read_only=True)
+    decimal_format = serializers.ChoiceField(choices=UserPreferences.DecimalFormatChoices)
+    decimal_format_display = serializers.CharField(source="get_decimal_format_display", read_only=True)
     time_zone = serializers.CharField()
     time_format = serializers.ChoiceField(choices=UserPreferences.TimeFormatChoices)
-    time_format_display = serializers.CharField(
-        source="get_time_format_display",
-        read_only=True,
-    )
+    time_format_display = serializers.CharField(source="get_time_format_display", read_only=True)
     fiori_theme = serializers.ChoiceField(choices=UserPreferences.FioriThemeChoices)
-    fiori_theme_display = serializers.CharField(
-        source="get_fiori_theme_display",
-        read_only=True,
-    )
+    fiori_theme_display = serializers.CharField(source="get_fiori_theme_display", read_only=True)
     show_timezone = serializers.BooleanField()
 
     class Meta:

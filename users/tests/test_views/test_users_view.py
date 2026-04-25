@@ -26,24 +26,15 @@ class TestUnauthenticatedAccess:
         assert drf_client.get(detail_url).status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_users_create_requires_authentication(self, drf_client):
-        assert (
-            drf_client.post(USERS_URL, {"username": "new"}).status_code
-            == status.HTTP_401_UNAUTHORIZED
-        )
+        assert drf_client.post(USERS_URL, {"username": "new"}).status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_users_update_requires_authentication(self, user, drf_client):
         detail_url = get_user_detail_url(user.uuid)
-        assert (
-            drf_client.put(detail_url, {"username": "changed"}).status_code
-            == status.HTTP_401_UNAUTHORIZED
-        )
+        assert drf_client.put(detail_url, {"username": "changed"}).status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_users_partial_update_requires_authentication(self, user, drf_client):
         detail_url = get_user_detail_url(user.uuid)
-        assert (
-            drf_client.patch(detail_url, {"first_name": "X"}).status_code
-            == status.HTTP_401_UNAUTHORIZED
-        )
+        assert drf_client.patch(detail_url, {"first_name": "X"}).status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_users_destroy_requires_authentication(self, user, drf_client):
         detail_url = get_user_detail_url(user.uuid)
@@ -54,9 +45,7 @@ class TestPermissionEnforcement:
     def test_users_list_allowed_without_view_permission(self, user_drf_client):
         assert user_drf_client.get(USERS_URL).status_code == status.HTTP_200_OK
 
-    def test_users_retrieve_allowed_without_view_permission(
-        self, user, user_drf_client
-    ):
+    def test_users_retrieve_allowed_without_view_permission(self, user, user_drf_client):
         detail_url = get_user_detail_url(user.uuid)
         assert user_drf_client.get(detail_url).status_code == status.HTTP_200_OK
 
@@ -64,16 +53,12 @@ class TestPermissionEnforcement:
         response = user_drf_client.post(USERS_URL, {"username": "shouldfail"})
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_users_update_forbidden_without_change_permission(
-        self, user, user_drf_client
-    ):
+    def test_users_update_forbidden_without_change_permission(self, user, user_drf_client):
         detail_url = get_user_detail_url(user.uuid)
         response = user_drf_client.patch(detail_url, {"first_name": "Test"})
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_users_destroy_forbidden_without_delete_permission(
-        self, user, user_drf_client
-    ):
+    def test_users_destroy_forbidden_without_delete_permission(self, user, user_drf_client):
         detail_url = get_user_detail_url(user.uuid)
         response = user_drf_client.delete(detail_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -132,38 +117,21 @@ class TestRetrieveEndpoint:
 class TestCreateEndpoint:
     def test_users_create_new_user(self, auth_drf_client):
         client, _ = auth_drf_client("users.add_user")
-        response = client.post(
-            USERS_URL,
-            {
-                "username": "newUser",
-                "email": "newUser@example.com",
-            },
-        )
+        response = client.post(USERS_URL, {"username": "newUser", "email": "newUser@example.com"})
         assert response.status_code == status.HTTP_201_CREATED
         assert User.objects.filter(username="newUser").exists()
-        assert set(response.data.keys()) == {
-            "uuid",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_superuser",
-        }
+        assert set(response.data.keys()) == {"uuid", "username", "email", "first_name", "last_name", "is_superuser"}
 
     def test_users_create_returns_400_on_duplicate_username(self, auth_drf_client):
         client, _ = auth_drf_client("users.add_user")
         existing = UserFactory()
-        response = client.post(
-            USERS_URL, {"username": existing.username, "email": "newUser@example.com"}
-        )
+        response = client.post(USERS_URL, {"username": existing.username, "email": "newUser@example.com"})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_users_create_returns_400_on_duplicate_email(self, auth_drf_client):
         client, _ = auth_drf_client("users.add_user")
         existing = UserFactory()
-        response = client.post(
-            USERS_URL, {"username": "newUser", "email": existing.email}
-        )
+        response = client.post(USERS_URL, {"username": "newUser", "email": existing.email})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_users_create_returns_400_on_missing_username(self, auth_drf_client):
@@ -184,14 +152,7 @@ class TestUpdateEndpoint:
         url = get_user_detail_url(target_user.uuid)
         response = client.patch(url, {"first_name": "Updated"})
         assert response.status_code == status.HTTP_200_OK
-        assert set(response.data.keys()) == {
-            "uuid",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_superuser",
-        }
+        assert set(response.data.keys()) == {"uuid", "username", "email", "first_name", "last_name", "is_superuser"}
         target_user.refresh_from_db()
         assert target_user.first_name == "Updated"
 
@@ -200,23 +161,10 @@ class TestUpdateEndpoint:
         target_user = UserFactory()
         url = get_user_detail_url(target_user.uuid)
         response = client.patch(
-            url,
-            {
-                "username": "Updated",
-                "email": "updated@example.com",
-                "first_name": "Updated",
-                "last_name": "Name",
-            },
+            url, {"username": "Updated", "email": "updated@example.com", "first_name": "Updated", "last_name": "Name"}
         )
         assert response.status_code == status.HTTP_200_OK
-        assert set(response.data.keys()) == {
-            "uuid",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_superuser",
-        }
+        assert set(response.data.keys()) == {"uuid", "username", "email", "first_name", "last_name", "is_superuser"}
         assert response.data["username"] == "Updated"
         assert response.data["email"] == "updated@example.com"
         assert response.data["first_name"] == "Updated"
@@ -225,10 +173,7 @@ class TestUpdateEndpoint:
     def test_users_update_returns_404_for_nonexistent_uuid(self, auth_drf_client):
         client, _ = auth_drf_client("users.change_user")
         url = get_user_detail_url(uuid=uuid.uuid4())
-        assert (
-            client.patch(url, {"first_name": "Updated"}).status_code
-            == status.HTTP_404_NOT_FOUND
-        )
+        assert client.patch(url, {"first_name": "Updated"}).status_code == status.HTTP_404_NOT_FOUND
 
 
 class TestDeleteEndpoint:

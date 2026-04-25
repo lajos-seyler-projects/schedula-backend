@@ -12,10 +12,7 @@ from users.models import User
 
 def get_tokens(user):
     refresh = RefreshToken.for_user(user)
-    return {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-    }
+    return {"refresh": str(refresh), "access": str(refresh.access_token)}
 
 
 @pytest.fixture
@@ -52,9 +49,7 @@ def auth_drf_client(db):
 
         if permissions:
             perms = Permission.objects.annotate(
-                full_perm=Concat(
-                    F("content_type__app_label"), Value("."), F("codename")
-                )
+                full_perm=Concat(F("content_type__app_label"), Value("."), F("codename"))
             ).filter(full_perm__in=permissions)
 
             user.user_permissions.add(*perms)

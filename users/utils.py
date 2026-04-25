@@ -112,12 +112,7 @@ def build_timezone_response():
         continent = get_continent(tz)
         offset = format_offset(tz)
 
-        grouped[continent].append(
-            {
-                "value": tz,
-                "offset": offset,
-            }
-        )
+        grouped[continent].append({"value": tz, "offset": offset})
 
     return grouped
 

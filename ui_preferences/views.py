@@ -19,18 +19,13 @@ class DefaultColumnPreferencesView(GenericAPIView):
         table_id_param = request.query_params.get("table_id")
 
         if not table_id_param:
-            return Response(
-                {"table_id": ["This query parameter is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"table_id": ["This query parameter is required."]}, status=status.HTTP_400_BAD_REQUEST)
 
         preferences = get_preferences_for_table(table_id=table_id_param)
 
         if not preferences:
             return Response(
-                {
-                    "detail": f"No column preferences found for table '{table_id_param}'."
-                },
+                {"detail": f"No column preferences found for table '{table_id_param}'."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -38,9 +33,7 @@ class DefaultColumnPreferencesView(GenericAPIView):
         return Response(serializer.data)
 
 
-class UserColumnPreferencesViewSet(
-    mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
-):
+class UserColumnPreferencesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.UserColumnPreferenceSerializer
     filterset_class = filters.UserColumnPreferenceFilter
@@ -79,9 +72,7 @@ class UserColumnPreferencesViewSet(
         invalid_column_keys = get_invalid_column_keys(table_id, column_preferences)
 
         if invalid_column_keys:
-            errors["detail"] = (
-                f"Invalid column preferences: {', '.join(invalid_column_keys)}"
-            )
+            errors["detail"] = f"Invalid column preferences: {', '.join(invalid_column_keys)}"
 
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
@@ -96,9 +87,7 @@ class UserColumnPreferencesViewSet(
 
         self._inject_expressions(serializer.validated_data)
 
-        preferences = [
-            models.UserColumnPreference(**item) for item in serializer.validated_data
-        ]
+        preferences = [models.UserColumnPreference(**item) for item in serializer.validated_data]
         created_preferences = models.UserColumnPreference.objects.bulk_create(
             preferences,
             update_conflicts=True,
@@ -155,23 +144,14 @@ class UserFilterPreferencesUpdateView(GenericAPIView):
         if not filter_preferences:
             errors["filter_preferences"] = ["This field is required."]
 
-        validated_data, missing_filters = self.validate_filter_preferences(
-            request.user, table_id, filter_preferences
-        )
+        validated_data, missing_filters = self.validate_filter_preferences(request.user, table_id, filter_preferences)
         if missing_filters:
-            filters_text = [
-                f"{table_id}:{filter_name}" for table_id, filter_name in missing_filters
-            ]
+            filters_text = [f"{table_id}:{filter_name}" for table_id, filter_name in missing_filters]
             errors["detail"] = f"Missing filter definitions: {', '.join(filters_text)}"
         if errors:
-            return Response(
-                errors,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-        models.UserFilterPreference.objects.filter(
-            user=request.user, filter_definition__table_id=table_id
-        ).delete()
+        models.UserFilterPreference.objects.filter(user=request.user, filter_definition__table_id=table_id).delete()
         preferences = [models.UserFilterPreference(**item) for item in validated_data]
         created_preferences = models.UserFilterPreference.objects.bulk_create(
             preferences,
@@ -189,16 +169,8 @@ class UserFilterPreferencesUpdateView(GenericAPIView):
             name = item.get("name")
             is_visible = item.get("is_visible", True)
             try:
-                filter_definition = models.FilterDefinition.objects.get(
-                    table_id=table_id, name=name
-                )
-                validated_data.append(
-                    {
-                        "user": user,
-                        "filter_definition": filter_definition,
-                        "is_visible": is_visible,
-                    }
-                )
+                filter_definition = models.FilterDefinition.objects.get(table_id=table_id, name=name)
+                validated_data.append({"user": user, "filter_definition": filter_definition, "is_visible": is_visible})
             except models.FilterDefinition.DoesNotExist:
                 missing_filters.append((table_id, name))
         return validated_data, missing_filters
@@ -216,9 +188,7 @@ class FilterVariantsViewSet(viewsets.ModelViewSet):
             return models.FilterVariant.objects.none()
 
         if self.request.method in SAFE_METHODS:
-            return models.FilterVariant.objects.filter(
-                Q(created_by=self.request.user) | Q(created_by__isnull=True)
-            )
+            return models.FilterVariant.objects.filter(Q(created_by=self.request.user) | Q(created_by__isnull=True))
         return models.FilterVariant.objects.filter(created_by=self.request.user)
 
     def perform_create(self, serializer):
@@ -230,8 +200,6 @@ class FilterVariantsViewSet(viewsets.ModelViewSet):
             data=request.data, context={"request": request, "table_id": table_id}
         )
         serializer.is_valid(raise_exception=True)
-        models.UserDefaultFilterVariant.objects.filter(
-            user=request.user, filter_variant__table_id=table_id
-        ).delete()
+        models.UserDefaultFilterVariant.objects.filter(user=request.user, filter_variant__table_id=table_id).delete()
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
