@@ -30,6 +30,13 @@ USERS_DEFAULT_COLUMN_PREFERENCES = {
             "label": "Last Name",
         },
         {
+            "name": "is_active",
+            "is_visible": True,
+            "key": "is_active",
+            "expression": {"type": "field", "path": "is_active"},
+            "label": "Is Active",
+        },
+        {
             "name": "is_superuser",
             "is_visible": True,
             "key": "is_superuser",

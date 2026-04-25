@@ -73,6 +73,7 @@ class TestListEndpoint:
             "email",
             "first_name",
             "last_name",
+            "is_active",
             "is_superuser",
         }
 
@@ -120,7 +121,15 @@ class TestCreateEndpoint:
         response = client.post(USERS_URL, {"username": "newUser", "email": "newUser@example.com"})
         assert response.status_code == status.HTTP_201_CREATED
         assert User.objects.filter(username="newUser").exists()
-        assert set(response.data.keys()) == {"uuid", "username", "email", "first_name", "last_name", "is_superuser"}
+        assert set(response.data.keys()) == {
+            "uuid",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_superuser",
+        }
 
     def test_users_create_returns_400_on_duplicate_username(self, auth_drf_client):
         client, _ = auth_drf_client("users.add_user")
@@ -152,7 +161,15 @@ class TestUpdateEndpoint:
         url = get_user_detail_url(target_user.uuid)
         response = client.patch(url, {"first_name": "Updated"})
         assert response.status_code == status.HTTP_200_OK
-        assert set(response.data.keys()) == {"uuid", "username", "email", "first_name", "last_name", "is_superuser"}
+        assert set(response.data.keys()) == {
+            "uuid",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_superuser",
+        }
         target_user.refresh_from_db()
         assert target_user.first_name == "Updated"
 
@@ -164,7 +181,15 @@ class TestUpdateEndpoint:
             url, {"username": "Updated", "email": "updated@example.com", "first_name": "Updated", "last_name": "Name"}
         )
         assert response.status_code == status.HTTP_200_OK
-        assert set(response.data.keys()) == {"uuid", "username", "email", "first_name", "last_name", "is_superuser"}
+        assert set(response.data.keys()) == {
+            "uuid",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_superuser",
+        }
         assert response.data["username"] == "Updated"
         assert response.data["email"] == "updated@example.com"
         assert response.data["first_name"] == "Updated"

@@ -17,7 +17,15 @@ def test_group_users_list_GET(user, auth_drf_client):
     assert response.status_code == status.HTTP_200_OK
     results = response.json()["results"]
     assert len(results) == 3
-    assert set(results[0].keys()) == {"uuid", "username", "email", "first_name", "last_name", "is_superuser"}
+    assert set(results[0].keys()) == {
+        "uuid",
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "is_superuser",
+    }
 
 
 def test_group_users_POST_and_DELETE_requires_permission(user, user_drf_client):
