@@ -29,6 +29,13 @@ USERS_FILTER_DEFINITIONS = {
             "is_visible_by_default": True,
         },
         {
+            "name": "is_active",
+            "label": "Is Active",
+            "query_parameter": "is_active",
+            "required": "False",
+            "is_visible_by_default": True,
+        },
+        {
             "name": "is_superuser",
             "label": "Is Superuser",
             "query_parameter": "is_superuser",

@@ -24,5 +24,6 @@ class UserFilter(filters.FilterSet):
             "email": ["icontains"],
             "first_name": ["icontains"],
             "last_name": ["icontains"],
+            "is_active": ["exact"],
             "is_superuser": ["exact"],
         }
