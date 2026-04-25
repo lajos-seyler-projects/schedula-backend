@@ -27,11 +27,7 @@ def test_user_activate_view(drf_client):
     assert registered_user.is_active is False
 
     activate_url = reverse(
-        "users:activate",
-        kwargs={
-            "uuid": registered_user.uuid,
-            "token": registered_user.get_activation_token(),
-        },
+        "users:activate", kwargs={"uuid": registered_user.uuid, "token": registered_user.get_activation_token()}
     )
     response = drf_client.get(activate_url, follow=True)
     registered_user.refresh_from_db()
@@ -58,10 +54,7 @@ def test_user_activate_view_invalid_token(drf_client):
 
     assert registered_user.is_active is False
 
-    activate_url = reverse(
-        "users:activate",
-        kwargs={"uuid": registered_user.uuid, "token": "invalid_token"},
-    )
+    activate_url = reverse("users:activate", kwargs={"uuid": registered_user.uuid, "token": "invalid_token"})
     response = drf_client.get(activate_url, follow=True)
     registered_user.refresh_from_db()
 

@@ -6,4 +6,7 @@ set -o nounset
 
 
 python manage.py migrate
+python manage.py load_filter_definitions
+python manage.py load_filter_variants
+
 exec python manage.py runserver 0.0.0.0:8000

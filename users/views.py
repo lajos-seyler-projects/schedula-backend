@@ -8,12 +8,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.views import (
-    TokenBlacklistView as DefaultTokenBlacklistView,
-)
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView as DefaultTokenObtainPairView,
-)
+from rest_framework_simplejwt.views import TokenBlacklistView as DefaultTokenBlacklistView
+from rest_framework_simplejwt.views import TokenObtainPairView as DefaultTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView as DefaultTokenRefreshView
 
 from common.permissions import UserHasPermission
@@ -22,11 +18,7 @@ from config.schema import extend_api_schema
 
 from . import filters, serializers
 from .models import User, UserPreferences
-from .utils import (
-    build_timezone_response,
-    get_filtered_permissions_by_exclusions,
-    send_registration_email,
-)
+from .utils import build_timezone_response, get_filtered_permissions_by_exclusions, send_registration_email
 
 
 class RegisterView(viewsets.generics.CreateAPIView):
@@ -48,14 +40,9 @@ class UserActivateView(generics.GenericAPIView):
         user = get_object_or_404(User, uuid=uuid)
 
         if not user.activate(token):
-            return Response(
-                {"message": "Invalid or expired activation token."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"message": "Invalid or expired activation token."}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(
-            {"message": "User activated successfully."}, status=status.HTTP_200_OK
-        )
+        return Response({"message": "User activated successfully."}, status=status.HTTP_200_OK)
 
 
 class TokenObtainPairView(DefaultTokenObtainPairView):
@@ -64,13 +51,7 @@ class TokenObtainPairView(DefaultTokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         refresh_token = response.data.pop("refresh", None)
-        response.set_cookie(
-            key="refresh",
-            value=refresh_token,
-            httponly=True,
-            secure=True,
-            samesite="None",
-        )
+        response.set_cookie(key="refresh", value=refresh_token, httponly=True, secure=True, samesite="None")
         return response
 
 
@@ -100,9 +81,7 @@ class TokenBlacklistView(DefaultTokenBlacklistView):
         return response
 
 
-class CurrentUserRetrieveUpdateViewSet(
-    mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
-):
+class CurrentUserRetrieveUpdateViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """User retrieve and update viewsets for the current user"""
 
     serializer_class = serializers.UserMeSerializer
@@ -115,6 +94,7 @@ class CurrentUserRetrieveUpdateViewSet(
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
+    filterset_class = filters.UserFilter
     lookup_field = "uuid"
 
     def get_serializer_class(self):
@@ -170,9 +150,7 @@ class UserPreferencesViewSet(viewsets.GenericViewSet):
             serializer = self.get_serializer(obj)
             return Response(serializer.data)
 
-        serializer = self.get_serializer(
-            obj, data={**request.data, "user": request.user.pk}, partial=True
-        )
+        serializer = self.get_serializer(obj, data={**request.data, "user": request.user.pk}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -183,9 +161,7 @@ class PermissionsViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = filters.PermissionFilter
 
     def get_queryset(self):
-        return get_filtered_permissions_by_exclusions().order_by(
-            "content_type__app_label", "content_type", "codename"
-        )
+        return get_filtered_permissions_by_exclusions().order_by("content_type__app_label", "content_type", "codename")
 
 
 class GroupsViewSet(viewsets.ModelViewSet):
@@ -197,8 +173,7 @@ class GroupsViewSet(viewsets.ModelViewSet):
             return Group.objects.order_by("name")
 
         return Group.objects.annotate(
-            user_count=Count("user", distinct=True),
-            permission_count=Count("permissions", distinct=True),
+            user_count=Count("user", distinct=True), permission_count=Count("permissions", distinct=True)
         ).order_by("name")
 
     def get_serializer_class(self):
@@ -207,21 +182,20 @@ class GroupsViewSet(viewsets.ModelViewSet):
         return serializers.GroupSerializer
 
 
+@extend_api_schema("UserGroupsViewSet")
 class UserGroupsViewSet(viewsets.ModelViewSet):
     permission_classes = [UserHasPermission]
-    permission_map = {
-        "GET": None,
-        "POST": "users.manage_user_groups",
-        "DELETE": "users.manage_user_groups",
-    }
+    permission_map = {"GET": None, "POST": "users.manage_user_groups", "DELETE": "users.manage_user_groups"}
     serializer_class = serializers.GroupSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Group.objects.none()
+
         uuid = self.kwargs.get("uuid")
         user = get_object_or_404(User, uuid=uuid)
         return user.groups.annotate(
-            user_count=Count("user", distinct=True),
-            permission_count=Count("permissions", distinct=True),
+            user_count=Count("user", distinct=True), permission_count=Count("permissions", distinct=True)
         ).order_by("name")
 
     def get_groups(self, request):
@@ -230,10 +204,7 @@ class UserGroupsViewSet(viewsets.ModelViewSet):
 
     def create(self, request, uuid=None):
         if not request.data.get("groups"):
-            return Response(
-                {"groups": ["This field is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"groups": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
 
         user = get_object_or_404(User, uuid=uuid)
         groups = self.get_groups(request)
@@ -243,10 +214,7 @@ class UserGroupsViewSet(viewsets.ModelViewSet):
     @action(methods=["delete"], detail=False)
     def delete(self, request, uuid=None):
         if not request.data.get("groups"):
-            return Response(
-                {"groups": ["This field is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"groups": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
 
         user = get_object_or_404(User, uuid=uuid)
         groups = self.get_groups(request)
@@ -254,16 +222,16 @@ class UserGroupsViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_api_schema("GroupUsersViewSet")
 class GroupUsersViewSet(viewsets.ModelViewSet):
     permission_classes = [UserHasPermission]
-    permission_map = {
-        "GET": None,
-        "POST": "users.manage_user_groups",
-        "DELETE": "users.manage_user_groups",
-    }
+    permission_map = {"GET": None, "POST": "users.manage_user_groups", "DELETE": "users.manage_user_groups"}
     serializer_class = serializers.UserSlimSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return User.objects.none()
+
         name = self.kwargs.get("name")
         group = get_object_or_404(Group, name=name)
         return group.user_set.all()
@@ -274,10 +242,7 @@ class GroupUsersViewSet(viewsets.ModelViewSet):
 
     def create(self, request, name=None):
         if not request.data.get("users"):
-            return Response(
-                {"users": ["This field is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"users": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
 
         group = get_object_or_404(Group, name=name)
         users = self.get_users(request)
@@ -287,10 +252,7 @@ class GroupUsersViewSet(viewsets.ModelViewSet):
     @action(methods=["delete"], detail=False)
     def delete(self, request, name=None):
         if not request.data.get("users"):
-            return Response(
-                {"users": ["This field is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"users": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
 
         group = get_object_or_404(Group, name=name)
         users = self.get_users(request)
@@ -298,16 +260,16 @@ class GroupUsersViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_api_schema("GroupPermissionsViewSet")
 class GroupPermissionsViewSet(viewsets.ModelViewSet):
     permission_classes = [UserHasPermission]
-    permission_map = {
-        "GET": None,
-        "POST": "users.manage_group_permissions",
-        "DELETE": "users.manage_group_permissions",
-    }
+    permission_map = {"GET": None, "POST": "users.manage_group_permissions", "DELETE": "users.manage_group_permissions"}
     serializer_class = serializers.PermissionSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Permission.objects.none()
+
         name = self.kwargs.get("name")
         group = get_object_or_404(Group, name=name)
         return group.permissions.all()
@@ -318,10 +280,7 @@ class GroupPermissionsViewSet(viewsets.ModelViewSet):
 
     def create(self, request, name=None):
         if not request.data.get("permissions"):
-            return Response(
-                {"permissions": ["This field is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"permissions": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
 
         group = get_object_or_404(Group, name=name)
         permissions = self.get_permission_objects(request)
@@ -331,10 +290,7 @@ class GroupPermissionsViewSet(viewsets.ModelViewSet):
     @action(methods=["delete"], detail=False)
     def delete(self, request, name=None):
         if not request.data.get("permissions"):
-            return Response(
-                {"permissions": ["This field is required."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"permissions": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
 
         group = get_object_or_404(Group, name=name)
         permissions = self.get_permission_objects(request)

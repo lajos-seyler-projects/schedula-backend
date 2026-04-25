@@ -53,13 +53,7 @@ def test_user_registration_view(drf_client):
 
 
 def test_user_registration_view_invalid_data(drf_client):
-    data = {
-        "username": "",
-        "email": "",
-        "first_name": "",
-        "last_name": "",
-        "password": "",
-    }
+    data = {"username": "", "email": "", "first_name": "", "last_name": "", "password": ""}
 
     response = drf_client.post(REGISTER_URL, data, format="json")
 

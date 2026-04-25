@@ -23,6 +23,7 @@ def test_group_users_list_GET(user, auth_drf_client):
         "email",
         "first_name",
         "last_name",
+        "is_active",
         "is_superuser",
     }
 
@@ -30,14 +31,10 @@ def test_group_users_list_GET(user, auth_drf_client):
 def test_group_users_POST_and_DELETE_requires_permission(user, user_drf_client):
     group = GroupFactory()
     target = UserFactory()
-    response = user_drf_client.post(
-        get_group_users(group.name), data={"users": [target.uuid]}, format="json"
-    )
+    response = user_drf_client.post(get_group_users(group.name), data={"users": [target.uuid]}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    response = user_drf_client.delete(
-        get_group_users(group.name), data={"users": [target.uuid]}, format="json"
-    )
+    response = user_drf_client.delete(get_group_users(group.name), data={"users": [target.uuid]}, format="json")
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -45,9 +42,7 @@ def test_group_users_list_POST(user, auth_drf_client):
     group = GroupFactory()
     target = UserFactory()
     client, _ = auth_drf_client("users.manage_user_groups", user=user)
-    response = client.post(
-        get_group_users(group.name), data={"users": [target.uuid]}, format="json"
-    )
+    response = client.post(get_group_users(group.name), data={"users": [target.uuid]}, format="json")
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert group.user_set.count() == 1
     assert group.user_set.filter(id=target.id).exists()
@@ -60,9 +55,7 @@ def test_group_users_list_DELETE(user, auth_drf_client):
     group.user_set.add(target, other_user)
     assert group.user_set.count() == 2
     client, _ = auth_drf_client("users.manage_user_groups", user=user)
-    response = client.delete(
-        get_group_users(group.name), data={"users": [target.uuid]}, format="json"
-    )
+    response = client.delete(get_group_users(group.name), data={"users": [target.uuid]}, format="json")
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert group.user_set.count() == 1
     assert group.user_set.filter(id=target.id).exists() is False

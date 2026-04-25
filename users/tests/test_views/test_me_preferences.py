@@ -13,9 +13,7 @@ def test_preferences_only_allow_GET_and_PATCH(user_drf_client):
     response = user_drf_client.get(PREFERENCES_URL)
     assert response.status_code == status.HTTP_200_OK
 
-    response = user_drf_client.patch(
-        PREFERENCES_URL, {"time_format": "12"}, format="json"
-    )
+    response = user_drf_client.patch(PREFERENCES_URL, {"time_format": "12"}, format="json")
     assert response.status_code == status.HTTP_200_OK
 
     response = user_drf_client.delete(PREFERENCES_URL)
@@ -42,11 +40,7 @@ def test_preferences_returns_request_users_data(auth_drf_client):
 
 def test_preferences_response(user, auth_drf_client):
     UserPreferencesFactory(
-        user=user,
-        date_format="ed",
-        decimal_format="eu",
-        time_format="12",
-        fiori_theme="sap_fiori_3_dark",
+        user=user, date_format="ed", decimal_format="eu", time_format="12", fiori_theme="sap_fiori_3_dark"
     )
 
     client, _ = auth_drf_client(user=user)
@@ -66,15 +60,9 @@ def test_preferences_response(user, auth_drf_client):
 
 
 def test_preferences_PATCH(user, auth_drf_client):
-    preferences = UserPreferencesFactory(
-        user=user, date_format="ed", fiori_theme="sap_horizon"
-    )
+    preferences = UserPreferencesFactory(user=user, date_format="ed", fiori_theme="sap_horizon")
     client, user = auth_drf_client(user=user)
-    response = client.patch(
-        PREFERENCES_URL,
-        {"date_format": "es", "fiori_theme": "sap_horizon_dark"},
-        format="json",
-    )
+    response = client.patch(PREFERENCES_URL, {"date_format": "es", "fiori_theme": "sap_horizon_dark"}, format="json")
     assert response.status_code == 200
     preferences.refresh_from_db()
     assert preferences.date_format == "es"
@@ -82,16 +70,10 @@ def test_preferences_PATCH(user, auth_drf_client):
 
 
 def test_preferences_PATCH_modifying_user_field_is_not_possible(user, auth_drf_client):
-    preferences = UserPreferencesFactory(
-        user=user, date_format="ed", fiori_theme="sap_horizon"
-    )
+    preferences = UserPreferencesFactory(user=user, date_format="ed", fiori_theme="sap_horizon")
     client, user = auth_drf_client(user=user)
     other_user = UserFactory()
-    response = client.patch(
-        PREFERENCES_URL,
-        {"user": other_user.id},
-        format="json",
-    )
+    response = client.patch(PREFERENCES_URL, {"user": other_user.id}, format="json")
     assert response.status_code == 200
     preferences.refresh_from_db()
     assert preferences.user == user
