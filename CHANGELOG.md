@@ -1,3 +1,19 @@
+## 0.10.0 (2026-04-25)
+
+### Feat
+
+- add is_active filter and filter definition
+- add is_active column to default column preferences
+- add management command to load default filter variants
+- add custom PageNumberPagination
+- add API endpoint for filter variants
+- add API endpoint for user filter preferences
+- add API endpoint for filter definitions
+- add filters for users API
+- add API endpoint for user column preferences
+- add API endpoint for default column preferences
+- create models for ui preferences
+
 ## 0.9.0 (2026-04-20)
 
 ### Feat
