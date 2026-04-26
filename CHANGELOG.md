@@ -1,3 +1,9 @@
+## 0.11.0 (2026-04-26)
+
+### Feat
+
+- add is_active field to UserDetailsSerializer
+
 ## 0.10.0 (2026-04-25)
 
 ### Feat
