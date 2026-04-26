@@ -1,25 +1,31 @@
 import pytest
 from django.urls import reverse
 
+from users.factories import PermissionFactory
+
 pytestmark = pytest.mark.django_db
 
 ME_URL = reverse("users:me")
 
 
-def test_me_view_GET(drf_client, user, user_drf_client):
+def test_me_view_requires_authentication(drf_client):
     unauthenticated_response = drf_client.get(ME_URL)
-
     assert unauthenticated_response.status_code == 401
 
-    response = user_drf_client.get(ME_URL)
+
+def test_me_view_GET(auth_drf_client):
+    permissions = PermissionFactory.create_batch(3)
+    client, user = auth_drf_client()
+    user.user_permissions.set(permissions)
+    response = client.get(ME_URL)
 
     assert response.status_code == 200
+    assert set(response.data.keys()) == {"username", "email", "first_name", "last_name", "is_superuser", "permissions"}
     assert response.data["username"] == user.username
     assert response.data["email"] == user.email
     assert response.data["first_name"] == user.first_name
     assert response.data["last_name"] == user.last_name
-
-    assert "password" not in response.data
+    assert len(response.data["permissions"]) == 3
 
 
 @pytest.mark.parametrize(
