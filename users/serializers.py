@@ -1,8 +1,11 @@
 from django.contrib.auth.models import Group, Permission
+from django.db.models import Value
+from django.db.models.functions import Concat
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer as DefaultTokenObtainPairSerializer
 
 from .models import User, UserPreferences
+from .utils import get_filtered_permissions_by_exclusions
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -40,14 +43,26 @@ class TokenObtainPairSerializer(DefaultTokenObtainPairSerializer):
 
 
 class UserMeSerializer(serializers.ModelSerializer):
+    permissions = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
-        fields = ("username", "email", "first_name", "last_name", "password")
+        fields = ("username", "email", "first_name", "last_name", "password", "is_superuser", "permissions")
         extra_kwargs = {
             "username": {"required": False},
             "email": {"required": False},
             "password": {"required": False, "write_only": True},
         }
+
+    def get_permissions(self, obj) -> list[str]:
+        filtered_permissions = (
+            get_filtered_permissions_by_exclusions()
+            .annotate(full_label=Concat("content_type__app_label", Value("."), "codename"))
+            .filter(full_label__in=obj.get_all_permissions())
+            .order_by("content_type__app_label", "codename")
+        )
+
+        return [f"{p.content_type.app_label}.{p.codename}" for p in filtered_permissions]
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
