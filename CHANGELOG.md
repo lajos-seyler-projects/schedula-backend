@@ -1,3 +1,9 @@
+## 0.12.0 (2026-04-26)
+
+### Feat
+
+- make email field uneditable from users api
+
 ## 0.11.0 (2026-04-26)
 
 ### Feat
