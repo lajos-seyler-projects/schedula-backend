@@ -1,3 +1,9 @@
+## 0.13.0 (2026-04-26)
+
+### Feat
+
+- add permissions field to UserMeSerializer
+
 ## 0.12.0 (2026-04-26)
 
 ### Feat
