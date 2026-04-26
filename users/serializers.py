@@ -65,6 +65,12 @@ class UserSlimSerializer(serializers.ModelSerializer):
         model = User
         fields = ("uuid", "username", "email", "first_name", "last_name", "is_active", "is_superuser")
 
+    def get_fields(self):
+        fields = super().get_fields()
+        if self.instance is not None:
+            fields["email"].read_only = True
+        return fields
+
 
 class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
