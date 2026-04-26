@@ -176,10 +176,18 @@ class TestUpdateEndpoint:
 
     def test_users_full_update(self, auth_drf_client):
         client, _ = auth_drf_client("users.change_user")
-        target_user = UserFactory()
+        target_user = UserFactory(is_active=False, is_superuser=False)
         url = get_user_detail_url(target_user.uuid)
         response = client.patch(
-            url, {"username": "Updated", "email": "updated@example.com", "first_name": "Updated", "last_name": "Name"}
+            url,
+            {
+                "username": "Updated",
+                "email": "updated@example.com",
+                "first_name": "Updated",
+                "last_name": "Name",
+                "is_active": True,
+                "is_superuser": True,
+            },
         )
         assert response.status_code == status.HTTP_200_OK
         assert set(response.data.keys()) == {
@@ -192,9 +200,11 @@ class TestUpdateEndpoint:
             "is_superuser",
         }
         assert response.data["username"] == "Updated"
-        assert response.data["email"] == "updated@example.com"
+        assert response.data["email"] != "updated@example.com"
         assert response.data["first_name"] == "Updated"
         assert response.data["last_name"] == "Name"
+        assert response.data["is_active"] is True
+        assert response.data["is_superuser"] is True
 
     def test_users_update_returns_404_for_nonexistent_uuid(self, auth_drf_client):
         client, _ = auth_drf_client("users.change_user")
