@@ -13,7 +13,7 @@ dependencies = [
     "djangorestframework-simplejwt>=5.5.1",
     "drf-spectacular>=0.29.0",
     "markdown>=3.10.2",
-    "psycopg[c]>=3.3.3",
+    "psycopg[c]>=3.3.4",
 ]
 
 [dependency-groups]
