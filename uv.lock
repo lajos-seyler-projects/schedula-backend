@@ -94,7 +94,7 @@ requires-dist = [
     { name = "django-filter", specifier = ">=25.2" },
     { name = "djangorestframework", specifier = ">=3.17.1" },
     { name = "djangorestframework-simplejwt", specifier = ">=5.5.1" },
-    { name = "drf-spectacular", specifier = ">=0.29.0" },
+    { name = "drf-spectacular", specifier = ">=0.30.0" },
     { name = "markdown", specifier = ">=3.10.2" },
     { name = "psycopg", extras = ["c"], specifier = ">=3.3.4" },
 ]
