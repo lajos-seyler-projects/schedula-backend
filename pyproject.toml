@@ -12,7 +12,7 @@ dependencies = [
     "djangorestframework>=3.17.1",
     "djangorestframework-simplejwt>=5.5.1",
     "drf-spectacular>=0.30.0",
-    "markdown>=3.10.2",
+    "markdown>=3.10.3",
     "psycopg[c]>=3.3.4",
 ]
 
